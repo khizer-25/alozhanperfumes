@@ -1,0 +1,168 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { ShoppingBag, Eye, Star } from 'lucide-react';
+
+const ProductList = ({ onAddToCart }) => {
+  const products = [
+    {
+      id: 1,
+      name: 'Royal Oud Intense',
+      category: 'Artisan Ouds',
+      price: '$240',
+      rating: 5,
+      image: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=600&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 2,
+      name: 'Velvet Musk Absolute',
+      category: 'Noble Essences',
+      price: '$185',
+      rating: 4,
+      image: 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 3,
+      name: 'Smoked Saffron',
+      category: 'Custom Blends',
+      price: '$210',
+      rating: 5,
+      image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=600&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 4,
+      name: 'Midnight Bakhoor',
+      category: 'Artisan Ouds',
+      price: '$195',
+      rating: 5,
+      image: 'https://images.unsplash.com/photo-1616949755610-8c9bbc08f138?w=600&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 5,
+      name: 'Imperial Rose Water',
+      category: 'Noble Essences',
+      price: '$160',
+      rating: 4,
+      image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 6,
+      name: 'Amber Élite',
+      category: 'Custom Blends',
+      price: '$225',
+      rating: 5,
+      image: 'https://images.unsplash.com/photo-1512203530485-2a6081498144?w=600&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 7,
+      name: 'Golden Agarwood',
+      category: 'Artisan Ouds',
+      price: '$310',
+      rating: 5,
+      image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=600&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 8,
+      name: 'Mystic Scent Atelier',
+      category: 'Custom Blends',
+      price: '$190',
+      rating: 4,
+      image: 'https://images.unsplash.com/photo-1608528577891-eb055944f2e7?w=600&auto=format&fit=crop&q=80',
+    },
+  ];
+
+  const handleExploreMore = () => {
+    window.location.href = '/products';
+  };
+
+  return (
+    <div className="bg-[#78532f] py-20 px-6 font-sans antialiased">
+      
+      {/* --- HEADER SECTION --- */}
+      <div className="max-w-7xl mx-auto text-center mb-16">
+        <p className="text-[#d4af37] text-xs tracking-[0.3em] mb-3 uppercase font-bold">
+          The Curated Collection
+        </p>
+        <h2 className="text-4xl md:text-5xl font-light text-[#362720] mb-4 tracking-tight leading-tight">
+          Our Signature Creations
+        </h2>
+        <div className="w-16 h-[1px] bg-[#d4af37] mx-auto mb-6" />
+        <p className="max-w-2xl mx-auto text-[#382820] text-sm md:text-base leading-relaxed font-light">
+          Explore liquid poetry. Every bottle houses rare extractions, aged agarwood, and tailored molecules mixed by hand.
+        </p>
+      </div>
+
+      {/* --- PRODUCT GRID (2 Rows, 4 Columns) --- */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+        {products.map((product) => (
+          <motion.div
+            key={product.id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: product.id * 0.05 }}
+            className="bg-[#26201c] rounded-sm overflow-hidden shadow-2xl border border-white/5 flex flex-col justify-between group"
+          >
+            <div className="h-80 overflow-hidden relative">
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors duration-500 z-10" />
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
+              />
+              <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button className="p-2 bg-[#26201c]/80 backdrop-blur-sm border border-white/10 rounded-full text-stone-300 hover:text-[#d4af37]">
+                  <Eye className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 flex-grow flex flex-col justify-between text-center">
+              <div>
+                <p className="text-[#d4af37]/70 text-[10px] tracking-[0.2em] uppercase mb-1 font-medium">
+                  {product.category}
+                </p>
+                <h3 className="text-lg font-medium text-white mb-2 tracking-wide group-hover:text-[#d4af37] transition-colors duration-300">
+                  {product.name}
+                </h3>
+                <div className="flex justify-center gap-1 mb-4 opacity-60">
+                  {[...Array(5)].map((_, i) => (
+                    <Star 
+                      key={i} 
+                      className={`w-3 h-3 ${i < product.rating ? 'fill-[#d4af37] text-[#d4af37]' : 'text-stone-600'}`} 
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xl font-light text-stone-200 mb-6 tracking-wider">
+                  {product.price}
+                </p>
+
+                <button
+                  onClick={() => onAddToCart(product)}
+                  className="w-full py-3 bg-transparent border border-[#d4af37] text-[#d4af37] text-xs font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-2 hover:bg-[#D4AF37] hover:text-black transition-all duration-300"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  ADD TO CART
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* --- EXPLORE MORE CALL TO ACTION --- */}
+      <div className="text-center">
+        <button
+          onClick={handleExploreMore}
+          className="inline-flex items-center gap-4 px-12 py-4 bg-gradient-to-r from-[#2a2420] to-[#1a1512] text-white border border-[#d4af37]/30 font-bold text-xs tracking-[0.25em] uppercase hover:border-[#d4af37] shadow-xl transition-all duration-300 rounded-sm hover:tracking-[0.3em]"
+        >
+          EXPLORE ENTIRE ATELIER
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ProductList;
