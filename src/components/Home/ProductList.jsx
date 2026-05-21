@@ -8,7 +8,7 @@ const ProductList = ({ onAddToCart }) => {
       id: 1,
       name: 'Royal Oud Intense',
       category: 'Artisan Ouds',
-      price: '$240',
+      price: 240,
       rating: 5,
       image: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=600&auto=format&fit=crop&q=80',
     },
@@ -32,7 +32,7 @@ const ProductList = ({ onAddToCart }) => {
       id: 4,
       name: 'Midnight Bakhoor',
       category: 'Artisan Ouds',
-      price: '$195',
+      price: 195,
       rating: 5,
       image: 'https://images.unsplash.com/photo-1616949755610-8c9bbc08f138?w=600&auto=format&fit=crop&q=80',
     },
@@ -104,11 +104,19 @@ const ProductList = ({ onAddToCart }) => {
           >
             <div className="h-80 overflow-hidden relative">
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors duration-500 z-10" />
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
-              />
+              {product.image.startsWith('http') ? (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
+                />
+              ) : (
+                <img
+                  src={`http://localhost:5000${product.image}`}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
+                />
+              )}
               <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button className="p-2 bg-[#26201c]/80 backdrop-blur-sm border border-white/10 rounded-full text-stone-300 hover:text-[#d4af37]">
                   <Eye className="w-4 h-4" />
@@ -128,15 +136,15 @@ const ProductList = ({ onAddToCart }) => {
                   {[...Array(5)].map((_, i) => (
                     <Star 
                       key={i} 
-                      className={`w-3 h-3 ${i < product.rating ? 'fill-[#d4af37] text-[#d4af37]' : 'text-stone-600'}`} 
+                      className={`w-3 h-3 ${i < Math.floor(product.rating || 5) ? 'fill-[#d4af37] text-[#d4af37]' : 'text-stone-600'}`} 
                     />
                   ))}
                 </div>
               </div>
 
               <div>
-                <p className="text-xl font-light text-stone-200 mb-6 tracking-wider">
-                  {product.price}
+                <p className="text-xl font-light text-stone-200 mb-6 tracking-wider font-mono">
+                  ${product.price}
                 </p>
 
                 <button

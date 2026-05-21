@@ -1,10 +1,27 @@
-import { useState } from "react";
-import { ShoppingBag, User, Menu, X } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { ShoppingBag, User, Menu, X, LogOut, ClipboardList, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-function Header({ cartCount, onOpenCart, isProductsPage }) {
+function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const sidebarVariants = {
     closed: { x: "-100%", transition: { type: "spring", stiffness: 300, damping: 30 } },
@@ -14,11 +31,23 @@ function Header({ cartCount, onOpenCart, isProductsPage }) {
   const menuLinks = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products" },  
-    // { name: "About", path: "/about" },
-    // { name: "Shop", path: "#collections" },
     { name: "Go to cart", action: onOpenCart },
-    { name: "Login", path: "/login" },
   ];
+
+  // Dynamic menu links for drawer
+  if (user) {
+    menuLinks.push({ name: "My Orders", path: "/profile" });
+    if (user.role === 'admin') {
+      menuLinks.push({ name: "Admin Dashboard", path: "/admin" });
+    }
+  } else {
+    menuLinks.push({ name: "Login", path: "/login" });
+  }
+
+  const handleDropdownItemClick = (path) => {
+    setIsDropdownOpen(false);
+    navigate(path);
+  };
 
   return (
     <>
