@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState, useRef, useEffect } from "react";
 import { ShoppingBag, User, Menu, X, LogOut, ClipboardList, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,6 +23,15 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+=======
+import { useState } from "react";
+import { ShoppingBag, User, Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+
+function Header({ cartCount, onOpenCart, isProductsPage }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+>>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
 
   const sidebarVariants = {
     closed: { x: "-100%", transition: { type: "spring", stiffness: 300, damping: 30 } },
@@ -31,6 +41,7 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
   const menuLinks = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products" },  
+<<<<<<< HEAD
     { name: "Go to cart", action: onOpenCart },
   ];
 
@@ -49,12 +60,24 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
     navigate(path);
   };
 
+=======
+    // { name: "About", path: "/about" },
+    // { name: "Shop", path: "#collections" },
+    { name: "Go to cart", action: onOpenCart },
+    { name: "Login", path: "/login" },
+  ];
+
+>>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
   return (
     <>
       <header className="fixed top-4 left-0 z-50 w-full px-4 md:top-6 md:px-6">
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
+<<<<<<< HEAD
+=======
+          // {/* UPDATED: Glassmorphism layout values applied below */}
+>>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
           className={`mx-auto flex max-w-7xl items-center justify-between rounded-full border backdrop-blur-xl shadow-lg transition-all duration-300 md:px-4 py-2 px-3 ${
             isProductsPage 
               ? "border-stone-700/40 bg-[#261c16]/75 shadow-black/10 text-white" 
@@ -74,7 +97,11 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
             <Menu size={18} strokeWidth={1.5} />
           </button>
 
+<<<<<<< HEAD
           {/* Logo Title */}
+=======
+          {/* Logo Context Title */}
+>>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link to="/" className="no-underline">
               <h1 className="text-xl font-black tracking-tighter text-white transition-colors duration-300 md:text-3xl">
@@ -83,11 +110,18 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
             </Link>
           </div>
 
+<<<<<<< HEAD
           {/* Icon Interaction Group */}
           <div className={`flex items-center gap-0.5 rounded-full p-0.5 transition-colors duration-300 md:gap-1 md:p-1 md:px-3 relative ${
             isProductsPage ? "bg-white/5" : "bg-white/20"
           }`}>
             {/* Cart Button */}
+=======
+          {/* Icon Interaction Container Control Group */}
+          <div className={`flex items-center gap-0.5 rounded-full p-0.5 transition-colors duration-300 md:gap-1 md:p-1 md:px-3 ${
+            isProductsPage ? "bg-white/5" : "bg-white/20"
+          }`}>
+>>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
             <button 
               className="relative p-2 text-white transition-opacity hover:opacity-70" 
               onClick={onOpenCart} 
@@ -107,6 +141,7 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
               isProductsPage ? "bg-white/10" : "bg-white/30"
             }`} />
             
+<<<<<<< HEAD
             {/* User Dropdown Trigger */}
             <div className="relative" ref={dropdownRef}>
               {user ? (
@@ -184,11 +219,20 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
                 )}
               </AnimatePresence>
             </div>
+=======
+            <button className="p-2 text-white transition-opacity hover:opacity-70" type="button">
+              <User size={18} strokeWidth={1.5} />
+            </button>
+>>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
           </div>
         </motion.div>
       </header>
 
+<<<<<<< HEAD
       {/* Slide-out Drawer */}
+=======
+      {/* Slide-out Navigation Drawer Menu */}
+>>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
       <AnimatePresence>
         {isMenuOpen && (
           <>
@@ -226,6 +270,7 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
                       )}
                     </div>
                   ))}
+<<<<<<< HEAD
                   {/* Logout option in drawer for mobile users */}
                   {user && (
                     <button
@@ -239,6 +284,8 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
                       Log Out
                     </button>
                   )}
+=======
+>>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
                 </nav>
                 <div className="mt-auto border-t border-slate-100 pt-6">
                   <p className="text-xs uppercase tracking-widest text-slate-400">© 2026 Orvélia Parfums</p>
