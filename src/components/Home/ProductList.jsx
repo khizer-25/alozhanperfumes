@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingBag, Eye, Star } from 'lucide-react';
+import { api } from '../../utils/api';
 
 const ProductList = ({ onAddToCart }) => {
-  const products = [
+  const mockProducts = [
     {
       id: 1,
       name: 'Royal Oud Intense',
       category: 'Artisan Ouds',
-      price: '$240',
+      price: 240,
       rating: 5,
       image: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=600&auto=format&fit=crop&q=80',
     },
@@ -16,7 +17,7 @@ const ProductList = ({ onAddToCart }) => {
       id: 2,
       name: 'Velvet Musk Absolute',
       category: 'Noble Essences',
-      price: '$185',
+      price: 185,
       rating: 4,
       image: 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=600&auto=format&fit=crop&q=80',
     },
@@ -24,7 +25,7 @@ const ProductList = ({ onAddToCart }) => {
       id: 3,
       name: 'Smoked Saffron',
       category: 'Custom Blends',
-      price: '$210',
+      price: 210,
       rating: 5,
       image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=600&auto=format&fit=crop&q=80',
     },
@@ -32,7 +33,7 @@ const ProductList = ({ onAddToCart }) => {
       id: 4,
       name: 'Midnight Bakhoor',
       category: 'Artisan Ouds',
-      price: '$195',
+      price: 195,
       rating: 5,
       image: 'https://images.unsplash.com/photo-1616949755610-8c9bbc08f138?w=600&auto=format&fit=crop&q=80',
     },
@@ -40,7 +41,7 @@ const ProductList = ({ onAddToCart }) => {
       id: 5,
       name: 'Imperial Rose Water',
       category: 'Noble Essences',
-      price: '$160',
+      price: 160,
       rating: 4,
       image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80',
     },
@@ -48,7 +49,7 @@ const ProductList = ({ onAddToCart }) => {
       id: 6,
       name: 'Amber Élite',
       category: 'Custom Blends',
-      price: '$225',
+      price: 225,
       rating: 5,
       image: 'https://images.unsplash.com/photo-1512203530485-2a6081498144?w=600&auto=format&fit=crop&q=80',
     },
@@ -56,7 +57,7 @@ const ProductList = ({ onAddToCart }) => {
       id: 7,
       name: 'Golden Agarwood',
       category: 'Artisan Ouds',
-      price: '$310',
+      price: 310,
       rating: 5,
       image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=600&auto=format&fit=crop&q=80',
     },
@@ -64,11 +65,39 @@ const ProductList = ({ onAddToCart }) => {
       id: 8,
       name: 'Mystic Scent Atelier',
       category: 'Custom Blends',
-      price: '$190',
+      price: 190,
       rating: 4,
       image: 'https://images.unsplash.com/photo-1608528577891-eb055944f2e7?w=600&auto=format&fit=crop&q=80',
     },
   ];
+
+  const [products, setProducts] = useState(mockProducts);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLiveProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await api.get('/products?pageSize=8');
+        
+        // If products exist in db, use them. Otherwise, let it fallback to mock
+        if (data.products && data.products.length > 0) {
+          // Normalize matching structures (e.g. id field)
+          const normalized = data.products.map(p => ({
+            ...p,
+            id: p._id, // Assign database id to react key
+          }));
+          setProducts(normalized);
+        }
+      } catch (err) {
+        console.warn('API connection failed or timed out. Falling back to signature mock collections:', err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLiveProducts();
+  }, []);
 
   const handleExploreMore = () => {
     window.location.href = '/products';
@@ -86,29 +115,37 @@ const ProductList = ({ onAddToCart }) => {
           Our Signature Creations
         </h2>
         <div className="w-16 h-[1px] bg-[#d4af37] mx-auto mb-6" />
-        <p className="max-w-2xl mx-auto text-[#382820] text-sm md:text-base leading-relaxed font-light">
+        <p className="max-w-2xl mx-auto text-[#382820] text-sm md:text-base leading-relaxed font-light font-sans">
           Explore liquid poetry. Every bottle houses rare extractions, aged agarwood, and tailored molecules mixed by hand.
         </p>
       </div>
 
       {/* --- PRODUCT GRID (2 Rows, 4 Columns) --- */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-        {products.map((product) => (
+        {products.map((product, index) => (
           <motion.div
-            key={product.id}
+            key={product.id || index}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: product.id * 0.05 }}
+            transition={{ duration: 0.5, delay: index * 0.05 }}
             className="bg-[#26201c] rounded-sm overflow-hidden shadow-2xl border border-white/5 flex flex-col justify-between group"
           >
             <div className="h-80 overflow-hidden relative">
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors duration-500 z-10" />
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
-              />
+              {product.image.startsWith('http') ? (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
+                />
+              ) : (
+                <img
+                  src={`http://localhost:5000${product.image}`}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
+                />
+              )}
               <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button className="p-2 bg-[#26201c]/80 backdrop-blur-sm border border-white/10 rounded-full text-stone-300 hover:text-[#d4af37]">
                   <Eye className="w-4 h-4" />
@@ -128,15 +165,15 @@ const ProductList = ({ onAddToCart }) => {
                   {[...Array(5)].map((_, i) => (
                     <Star 
                       key={i} 
-                      className={`w-3 h-3 ${i < product.rating ? 'fill-[#d4af37] text-[#d4af37]' : 'text-stone-600'}`} 
+                      className={`w-3 h-3 ${i < Math.floor(product.rating || 5) ? 'fill-[#d4af37] text-[#d4af37]' : 'text-stone-600'}`} 
                     />
                   ))}
                 </div>
               </div>
 
               <div>
-                <p className="text-xl font-light text-stone-200 mb-6 tracking-wider">
-                  {product.price}
+                <p className="text-xl font-light text-stone-200 mb-6 tracking-wider font-mono">
+                  ${product.price}
                 </p>
 
                 <button
