@@ -1,8 +1,7 @@
-<<<<<<< HEAD
 import React, { useState, useRef, useEffect } from "react";
 import { ShoppingBag, User, Menu, X, LogOut, ClipboardList, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,6 +9,22 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
   
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Monitor scroll to dynamically apply light vs dark glassmorphic styling
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const isBright = location.pathname !== "/" || isScrolled;
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -23,15 +38,6 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-=======
-import { useState } from "react";
-import { ShoppingBag, User, Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
-
-function Header({ cartCount, onOpenCart, isProductsPage }) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
->>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
 
   const sidebarVariants = {
     closed: { x: "-100%", transition: { type: "spring", stiffness: 300, damping: 30 } },
@@ -41,7 +47,6 @@ function Header({ cartCount, onOpenCart, isProductsPage }) {
   const menuLinks = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products" },  
-<<<<<<< HEAD
     { name: "Go to cart", action: onOpenCart },
   ];
 
@@ -60,27 +65,15 @@ function Header({ cartCount, onOpenCart, isProductsPage }) {
     navigate(path);
   };
 
-=======
-    // { name: "About", path: "/about" },
-    // { name: "Shop", path: "#collections" },
-    { name: "Go to cart", action: onOpenCart },
-    { name: "Login", path: "/login" },
-  ];
-
->>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
   return (
     <>
       <header className="fixed top-4 left-0 z-50 w-full px-4 md:top-6 md:px-6">
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-<<<<<<< HEAD
-=======
-          // {/* UPDATED: Glassmorphism layout values applied below */}
->>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
           className={`mx-auto flex max-w-7xl items-center justify-between rounded-full border backdrop-blur-xl shadow-lg transition-all duration-300 md:px-4 py-2 px-3 ${
-            isProductsPage 
-              ? "border-stone-700/40 bg-[#261c16]/75 shadow-black/10 text-white" 
+            isBright 
+              ? "border-stone-200/60 bg-[#fdfcf9]/80 shadow-md text-[#362720]" 
               : "border-white/20 bg-white/10 text-white"
           }`}
         >
@@ -89,48 +82,41 @@ function Header({ cartCount, onOpenCart, isProductsPage }) {
             onClick={() => setIsMenuOpen(true)}
             type="button"
             className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors md:h-10 md:w-10 ${
-              isProductsPage 
-                ? "bg-white/5 text-stone-200 hover:bg-white/15" 
+              isBright 
+                ? "bg-[#362720]/5 text-[#362720] hover:bg-[#362720]/15" 
                 : "bg-black/20 text-white hover:bg-black/40"
             }`}
           >
             <Menu size={18} strokeWidth={1.5} />
           </button>
 
-<<<<<<< HEAD
           {/* Logo Title */}
-=======
-          {/* Logo Context Title */}
->>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link to="/" className="no-underline">
-              <h1 className="text-xl font-black tracking-tighter text-white transition-colors duration-300 md:text-3xl">
-                ORVÉLIA
+              <h1 className={`text-xl font-black tracking-[2px] transition-colors duration-300 md:text-3xl ${
+                isBright ? "text-[#261c16]" : "text-white"
+              }`}>
+                Al Özhan
               </h1>
             </Link>
           </div>
 
-<<<<<<< HEAD
           {/* Icon Interaction Group */}
           <div className={`flex items-center gap-0.5 rounded-full p-0.5 transition-colors duration-300 md:gap-1 md:p-1 md:px-3 relative ${
-            isProductsPage ? "bg-white/5" : "bg-white/20"
+            isBright ? "bg-[#362720]/5" : "bg-white/20"
           }`}>
             {/* Cart Button */}
-=======
-          {/* Icon Interaction Container Control Group */}
-          <div className={`flex items-center gap-0.5 rounded-full p-0.5 transition-colors duration-300 md:gap-1 md:p-1 md:px-3 ${
-            isProductsPage ? "bg-white/5" : "bg-white/20"
-          }`}>
->>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
             <button 
-              className="relative p-2 text-white transition-opacity hover:opacity-70" 
+              className={`relative p-2 transition-opacity hover:opacity-70 ${
+                isBright ? "text-[#362720]" : "text-white"
+              }`} 
               onClick={onOpenCart} 
               type="button"
             >
               <ShoppingBag size={18} strokeWidth={1.5} />
               {cartCount > 0 && (
                 <span className={`absolute right-0.5 top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[8px] font-bold ${
-                  isProductsPage ? "bg-[#d4af37] text-white" : "bg-white text-black"
+                  isBright ? "bg-[#d4af37] text-white" : "bg-white text-black"
                 } md:h-4 md:w-4 md:text-[9px]`}>
                   {cartCount}
                 </span>
@@ -138,16 +124,17 @@ function Header({ cartCount, onOpenCart, isProductsPage }) {
             </button>
             
             <div className={`mx-1 h-4 w-[1px] ${
-              isProductsPage ? "bg-white/10" : "bg-white/30"
+              isBright ? "bg-[#362720]/10" : "bg-white/30"
             }`} />
             
-<<<<<<< HEAD
             {/* User Dropdown Trigger */}
             <div className="relative" ref={dropdownRef}>
               {user ? (
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="p-1 px-2 text-xs font-bold text-white hover:opacity-80 transition-all flex items-center gap-1.5 rounded-full bg-white/10"
+                  className={`p-1 px-2 text-xs font-bold hover:opacity-80 transition-all flex items-center gap-1.5 rounded-full ${
+                    isBright ? "text-[#362720] bg-[#362720]/5" : "text-white bg-white/10"
+                  }`}
                   type="button"
                 >
                   <div className="w-5 h-5 rounded-full bg-[#d4af37] text-black font-extrabold flex items-center justify-center text-[10px]">
@@ -158,7 +145,9 @@ function Header({ cartCount, onOpenCart, isProductsPage }) {
               ) : (
                 <Link 
                   to="/login"
-                  className="p-2 text-white transition-opacity hover:opacity-70 flex items-center justify-center"
+                  className={`p-2 transition-opacity hover:opacity-70 flex items-center justify-center ${
+                    isBright ? "text-[#362720]" : "text-white"
+                  }`}
                 >
                   <User size={18} strokeWidth={1.5} />
                 </Link>
@@ -219,20 +208,11 @@ function Header({ cartCount, onOpenCart, isProductsPage }) {
                 )}
               </AnimatePresence>
             </div>
-=======
-            <button className="p-2 text-white transition-opacity hover:opacity-70" type="button">
-              <User size={18} strokeWidth={1.5} />
-            </button>
->>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
           </div>
         </motion.div>
       </header>
 
-<<<<<<< HEAD
       {/* Slide-out Drawer */}
-=======
-      {/* Slide-out Navigation Drawer Menu */}
->>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
       <AnimatePresence>
         {isMenuOpen && (
           <>
@@ -270,7 +250,6 @@ function Header({ cartCount, onOpenCart, isProductsPage }) {
                       )}
                     </div>
                   ))}
-<<<<<<< HEAD
                   {/* Logout option in drawer for mobile users */}
                   {user && (
                     <button
@@ -284,11 +263,9 @@ function Header({ cartCount, onOpenCart, isProductsPage }) {
                       Log Out
                     </button>
                   )}
-=======
->>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
                 </nav>
                 <div className="mt-auto border-t border-slate-100 pt-6">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">© 2026 Orvélia Parfums</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">© 2026 Al Ozhan Perfumes Parfums</p>
                 </div>
               </div>
             </motion.div>

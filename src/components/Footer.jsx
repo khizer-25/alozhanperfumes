@@ -123,7 +123,7 @@ const Footer = () => {
           <div className="lg:col-span-2 space-y-8">
             <Link to="/" className="no-underline">
               {/* Refined font weight to match "Artisanal Fragrances" style */}
-              <h2 className="text-3xl font-light tracking-[0.15em] text-white">ORVÉLIA</h2>
+              <h2 className="text-3xl font-light tracking-[0.15em] text-white">Al Özhan</h2>
             </Link>
             <p className="text-stone-400 max-w-sm leading-relaxed font-light text-sm">
               Subscribe to receive updates on new launches, private sales, and <span className="text-[#d4af37]">olfactory stories.</span>
@@ -170,7 +170,7 @@ const Footer = () => {
           </div>
           
           <div className="text-[9px] tracking-[0.4em] text-stone-600 uppercase font-light">
-            © {currentYear} <span className="text-stone-500">ORVÉLIA PARFUMS</span>. ALL RIGHTS RESERVED.
+            © {currentYear} <span className="text-stone-500">Al Özhan PARFUMS</span>. ALL RIGHTS RESERVED.
           </div>
           
           <div className="flex gap-8 text-[9px] tracking-widest text-stone-600 uppercase font-bold">
