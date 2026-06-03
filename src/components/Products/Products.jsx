@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingBag, Eye, Star, Grid3X3, ArrowUpDown, X } from 'lucide-react';
 import { products as localProducts } from '../../data/products';
+import { api } from '../../utils/api';
 
 const Products = ({ onAddToCart }) => {
   const [products, setProducts] = useState(localProducts);
@@ -13,35 +14,37 @@ const Products = ({ onAddToCart }) => {
   // Quick View Modal State
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  /* ==========================================
-     PERMANENT BACKEND API CONNECTION (FUTURE USE)
-     ==========================================
-     Uncomment this section when your backend is ready.
-  */
-  /*
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchLiveProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://api.orvelia.com/v1/products'); // Replace with actual backend API link
-        if (!response.ok) throw new Error('Failed to capture atelier vault data.');
-        const data = await response.json();
-        setProducts(data);
+        setError(null);
+        // Request products from backend (pageSize=100 ensures we grab added ones too)
+        const data = await api.get('/products?pageSize=100');
+        
+        if (data.products && data.products.length > 0) {
+          // Normalize matching structures (e.g. id field)
+          const normalized = data.products.map(p => ({
+            ...p,
+            id: p._id, // Assign database id to react key
+          }));
+          setProducts(normalized);
+        }
       } catch (err) {
-        setError(err.message);
+        console.warn('API connection failed or timed out. Falling back to signature mock collections:', err.message);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+
+    fetchLiveProducts();
   }, []);
-  */
 
   // --- Dynamic Category Aggregation ---
-  const categories = ['All', ...new Set(localProducts.map(p => p.category))];
+  const categories = ['All', ...new Set(products.map(p => p.category))];
 
   // Helper to strip '$' if price is supplied as a string instead of number
   const cleanPrice = (price) => {
@@ -167,11 +170,19 @@ const Products = ({ onAddToCart }) => {
                 {/* Visual Imagery Box Container */}
                 <div className="h-72 overflow-hidden relative bg-stone-100">
                   <div className="absolute inset-0 bg-stone-900/5 group-hover:bg-transparent transition-colors duration-500 z-10" />
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
-                  />
+                  {product.image.startsWith('http') ? (
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
+                    />
+                  ) : (
+                    <img 
+                      src={`http://localhost:5000${product.image}`} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
+                    />
+                  )}
                   {/* Floating Size Tag */}
                   {product.size && (
                     <span className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md text-[10px] tracking-widest font-mono text-stone-700 px-2 py-0.5 rounded-xs border border-stone-200/50 z-20">
@@ -265,7 +276,11 @@ const Products = ({ onAddToCart }) => {
               </button>
               
               <div className="w-full md:w-1/2 h-64 md:h-auto bg-stone-100">
-                <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover" />
+                {selectedProduct.image.startsWith('http') ? (
+                  <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover" />
+                ) : (
+                  <img src={`http://localhost:5000${selectedProduct.image}`} alt={selectedProduct.name} className="w-full h-full object-cover" />
+                )}
               </div>
               
               <div className="w-full md:w-1/2 p-6 flex flex-col justify-between">

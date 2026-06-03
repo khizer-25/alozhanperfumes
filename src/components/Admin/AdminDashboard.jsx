@@ -4,7 +4,7 @@ import {
   BarChart3, PlusCircle, Layers, DollarSign, 
   ShoppingBag, ClipboardList, TrendingUp, Trash2, 
   Upload, CheckCircle, RefreshCw, Star,
-  Search, Filter, Clock, Truck, CreditCard, MapPin, User, Package, MessageSquare
+  Search, Filter, Clock, Truck, CreditCard, MapPin, User, Package, MessageSquare, Settings
 } from 'lucide-react';
 import { api } from '../../utils/api';
 
@@ -45,6 +45,61 @@ const AdminDashboard = () => {
   const [formError, setFormError] = useState('');
 
   const categories = ['Floral', 'Fresh', 'Woody', 'Gourmand', 'Musk', 'Aromatic', 'Oriental'];
+
+  // Store Settings States (Loaded from and saved to localStorage for dynamic checkout flow configuration)
+  const [isCodAvailable, setIsCodAvailable] = useState(() => {
+    const saved = localStorage.getItem('checkoutSettings');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.isCodAvailable !== undefined ? parsed.isCodAvailable : false;
+      } catch (e) {}
+    }
+    return false;
+  });
+
+  const [minCodAmountINR, setMinCodAmountINR] = useState(() => {
+    const saved = localStorage.getItem('checkoutSettings');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.minCodAmountINR || 500;
+      } catch (e) {}
+    }
+    return 500;
+  });
+
+  const [freeDeliveryThresholdINR, setFreeDeliveryThresholdINR] = useState(() => {
+    const saved = localStorage.getItem('checkoutSettings');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.freeDeliveryThresholdINR || 10000;
+      } catch (e) {}
+    }
+    return 10000;
+  });
+
+  const [defaultCheckoutStep, setDefaultCheckoutStep] = useState(() => {
+    const saved = localStorage.getItem('checkoutSettings');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.defaultCheckoutStep || 2;
+      } catch (e) {}
+    }
+    return 2;
+  });
+
+  const [settingsSuccess, setSettingsSuccess] = useState(false);
+
+  // Security / Change Password States
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   const syncData = async () => {
     try {
@@ -231,6 +286,65 @@ const AdminDashboard = () => {
     }
   };
 
+  // Save checkout configuration parameters
+  const handleSaveSettings = (e) => {
+    e.preventDefault();
+    setSettingsSuccess(false);
+
+    const updatedSettings = {
+      isCodAvailable,
+      minCodAmountINR: Number(minCodAmountINR),
+      freeDeliveryThresholdINR: Number(freeDeliveryThresholdINR),
+      defaultCheckoutStep: Number(defaultCheckoutStep),
+    };
+
+    localStorage.setItem('checkoutSettings', JSON.stringify(updatedSettings));
+    setSettingsSuccess(true);
+
+    // Also trigger custom event to notify other components reactively
+    window.dispatchEvent(new Event('checkoutSettingsUpdated'));
+
+    setTimeout(() => setSettingsSuccess(false), 4000);
+  };
+
+  // Rotate/Change password handler securely calling backend PUT /api/auth/profile
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess(false);
+
+    if (!newPassword || !confirmNewPassword) {
+      setPasswordError('Please fill in all security fields.');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError('New passwords do not match.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters.');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      // Calls user profile PUT update password
+      await api.put('/auth/profile', { password: newPassword });
+      
+      setPasswordSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setTimeout(() => setPasswordSuccess(false), 4000);
+    } catch (err) {
+      setPasswordError(err.message || 'Failed to rotate administrator credentials.');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   // Reactive order filtering and search logic
   const filteredOrders = orders.filter((order) => {
     // 1. Search Match: matches order ID, buyer name, or perfume name
@@ -342,6 +456,19 @@ const AdminDashboard = () => {
             >
               <MessageSquare className="w-4 h-4" />
               Customer Queries
+            </button>
+
+            {/* Store Settings Tab */}
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`w-full py-3 px-4 rounded-sm flex items-center gap-3 text-xs font-bold tracking-widest uppercase transition-all duration-300 ${
+                activeTab === 'settings'
+                  ? 'bg-[#d4af37] text-black shadow-md'
+                  : 'hover:bg-white/5 text-stone-300 hover:text-white'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              Store Settings
             </button>
           </nav>
         </div>
@@ -1254,6 +1381,248 @@ const AdminDashboard = () => {
                   ))}
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {/* TAB 6: STORE CONFIGURATION & SETTINGS */}
+          {activeTab === 'settings' && (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="space-y-8"
+            >
+              <div>
+                <h1 className="text-2xl font-light text-[#261c16] tracking-tight">Store Configurations</h1>
+                <p className="text-xs text-stone-500 font-light mt-1">Configure checkout logic, payment limits, merchant accounts, and administrator credentials.</p>
+              </div>
+
+              {/* Grid of Settings Panels */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                
+                {/* 1. CHECKOUT & PAYMENT FLOW CONTROLS */}
+                <div className="bg-white border border-stone-200 rounded-sm p-6 shadow-sm space-y-6">
+                  <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
+                    <ShoppingBag className="w-5 h-5 text-[#d4af37]" />
+                    <h3 className="text-xs uppercase tracking-widest text-stone-700 font-bold">Checkout & Payment Flow</h3>
+                  </div>
+
+                  {settingsSuccess && (
+                    <div className="p-3 bg-green-50 border-l-2 border-green-500 text-green-800 text-[11px] font-medium rounded-sm flex items-center gap-1.5 animate-pulse">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span>Checkout configurations updated successfully!</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSaveSettings} className="space-y-4 text-xs text-stone-600 font-medium">
+                    
+                    {/* COD Availability Toggle Switch */}
+                    <div className="flex items-center justify-between p-3 bg-stone-50/50 rounded-sm border border-stone-100">
+                      <div>
+                        <label className="text-stone-800 font-bold block">Cash on Delivery (COD)</label>
+                        <span className="text-[10px] text-stone-400 font-light">Determine if buyers can select COD during checkout.</span>
+                      </div>
+                      
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isCodAvailable}
+                          onChange={(e) => setIsCodAvailable(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-9 h-5 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#d4af37]"></div>
+                      </label>
+                    </div>
+
+                    {/* Minimum order for COD */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">
+                        Minimum COD Threshold Amount (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="500"
+                        value={minCodAmountINR}
+                        disabled={!isCodAvailable}
+                        onChange={(e) => setMinCodAmountINR(e.target.value)}
+                        className="w-full bg-stone-50 border border-stone-200 rounded-sm py-2 px-3 text-stone-800 focus:outline-none focus:border-[#d4af37] focus:bg-white disabled:opacity-40 disabled:cursor-not-allowed font-mono"
+                      />
+                    </div>
+
+                    {/* Free Delivery Threshold Amount */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">
+                        Free Delivery Threshold Value (₹)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="10000"
+                        value={freeDeliveryThresholdINR}
+                        onChange={(e) => setFreeDeliveryThresholdINR(e.target.value)}
+                        className="w-full bg-stone-50 border border-stone-200 rounded-sm py-2 px-3 text-stone-800 focus:outline-none focus:border-[#d4af37] focus:bg-white font-mono"
+                      />
+                    </div>
+
+                    {/* Default checkout landing step selection */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">
+                        Default Landing Step at /checkout
+                      </label>
+                      <select
+                        value={defaultCheckoutStep}
+                        onChange={(e) => setDefaultCheckoutStep(Number(e.target.value))}
+                        className="w-full bg-stone-50 border border-stone-200 rounded-sm py-2 px-3 text-stone-800 focus:outline-none focus:border-[#d4af37] focus:bg-white cursor-pointer"
+                      >
+                        <option value={1}>Step 1: Cart Items Summary</option>
+                        <option value={2}>Step 2: Shipping Delivery Form</option>
+                        <option value={3}>Step 3: Select Payment Gateway</option>
+                      </select>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full py-3 mt-2 bg-[#26201c] hover:bg-black text-[#d4af37] text-xs font-bold tracking-widest uppercase rounded-sm shadow-md transition-colors"
+                    >
+                      Save Configurations
+                    </button>
+                  </form>
+                </div>
+
+                {/* 2. DIRECT SETTLEMENT BANK ACCOUNT (UNAVAILABLE / COMPLIANCE LOCK) */}
+                <div className="bg-white border border-stone-200 rounded-sm p-6 shadow-sm space-y-6 relative overflow-hidden">
+                  
+                  {/* Visual Grey/Compliance Lock Overlay */}
+                  <div className="absolute inset-0 bg-[#f7f5f2]/80 backdrop-blur-xs z-20 flex flex-col items-center justify-center p-6 text-center">
+                    <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center text-[#d4af37] shadow-md border border-stone-200 mb-4 animate-bounce">
+                      🔒
+                    </div>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-stone-800 mb-1">
+                      Settlement Account Locked
+                    </h4>
+                    <span className="text-[9px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider scale-95 mb-3 inline-block">
+                      Compliance Hold
+                    </span>
+                    <p className="text-[10.5px] text-stone-500 font-light max-w-xs leading-relaxed">
+                      Direct merchant bank settlements routing is locked for verification audit. Please contact integration merchant support to amend settlement coordinates.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
+                    <CreditCard className="w-5 h-5 text-stone-400" />
+                    <h3 className="text-xs uppercase tracking-widest text-stone-400 font-bold">Settlement Account</h3>
+                  </div>
+
+                  <div className="space-y-4 text-xs text-stone-300 font-medium">
+                    <div className="space-y-1">
+                      <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold block">Settlement Bank Name</label>
+                      <input
+                        type="text"
+                        disabled
+                        value="State Bank of India"
+                        className="w-full bg-stone-50 border border-stone-200 rounded-sm py-2 px-3 text-stone-400 font-light"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold block">Account Holder Name</label>
+                      <input
+                        type="text"
+                        disabled
+                        value="Al Özhan Perfumes Ltd."
+                        className="w-full bg-stone-50 border border-stone-200 rounded-sm py-2 px-3 text-stone-400 font-light"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold block">Account Number</label>
+                        <input
+                          type="text"
+                          disabled
+                          value="•••• •••• •••• 9876"
+                          className="w-full bg-stone-50 border border-stone-200 rounded-sm py-2 px-3 text-stone-400 font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold block">IFSC Code</label>
+                        <input
+                          type="text"
+                          disabled
+                          value="SBIN0001234"
+                          className="w-full bg-stone-50 border border-stone-200 rounded-sm py-2 px-3 text-stone-400 font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. ADMINISTRATOR SECURITY (CHANGE PASSWORD) */}
+                <div className="bg-white border border-stone-200 rounded-sm p-6 shadow-sm space-y-6 lg:col-span-2">
+                  <div className="flex items-center gap-2 border-b border-stone-100 pb-3">
+                    <User className="w-5 h-5 text-[#d4af37]" />
+                    <h3 className="text-xs uppercase tracking-widest text-stone-700 font-bold">Change Administrator Password</h3>
+                  </div>
+
+                  {passwordError && (
+                    <div className="p-3 bg-red-50 border-l-2 border-red-500 text-red-800 text-[11px] font-medium rounded-sm">
+                      {passwordError}
+                    </div>
+                  )}
+
+                  {passwordSuccess && (
+                    <div className="p-3 bg-green-50 border-l-2 border-green-500 text-green-800 text-[11px] font-medium rounded-sm flex items-center gap-1.5">
+                      <CheckCircle className="w-4 h-4 text-green-600 animate-bounce" />
+                      <span>Administrator password updated successfully! Please keep this key secure.</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleChangePassword} className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-stone-600 font-medium items-end">
+                    
+                    {/* New Password */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">
+                        New Security Password
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="w-full bg-stone-50 border border-stone-200 rounded-sm py-2.5 px-3 text-stone-800 focus:outline-none focus:border-[#d4af37] focus:bg-white"
+                      />
+                    </div>
+
+                    {/* Confirm New Password */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block">
+                        Confirm New Password
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        className="w-full bg-stone-50 border border-stone-200 rounded-sm py-2.5 px-3 text-stone-800 focus:outline-none focus:border-[#d4af37] focus:bg-white"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                      type="submit"
+                      disabled={passwordLoading}
+                      className="w-full py-3 bg-[#26201c] hover:bg-black text-[#d4af37] text-xs font-bold tracking-widest uppercase rounded-sm shadow-md transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      {passwordLoading ? 'Rotating password...' : 'Rotate Credentials'}
+                    </button>
+                  </form>
+                </div>
+
+              </div>
             </motion.div>
           )}
 
