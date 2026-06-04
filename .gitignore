@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-# Dependencies
-node_modules/
-
-# Environment variables
-.env
-=======
 node_modules/ 
 dist/ 
 .env 
->>>>>>> 5871381b716b4a0776dfb39179167000712b33ac
