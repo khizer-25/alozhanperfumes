@@ -15,7 +15,7 @@ const ProductList = ({ onAddToCart }) => {
     },
     {
       id: 2,
-      name: 'Velvet Musk Absolute',
+      name: 'Cambodian Oud',
       category: 'Noble Essences',
       price: 185,
       rating: 4,

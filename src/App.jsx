@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom"; 
 import Header from "./components/Header";
-import HomePage from "./components/Home/HomePage";
+import HomePage from "./components/Home/Homepage";
 import FeaturesSection from "./components/Home/FeaturesSection";
 import Footer from "./components/Footer";
 import ProductList from "./components/Home/ProductList";

@@ -87,7 +87,7 @@ function ContactUs() {
               </div>
 
               <button type="submit" disabled={status.loading} className="w-full flex items-center justify-center gap-2 bg-[#261c16] text-white py-3.5 px-6 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#362720] transition-colors disabled:opacity-50">
-                {status.loading ? <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><span>Transmit Message</span><Send size={12} /></>}
+                {status.loading ? <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><span>Send Message</span><Send size={12} /></>}
               </button>
             </form>
           )}
