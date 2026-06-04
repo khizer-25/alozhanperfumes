@@ -31,10 +31,25 @@ const Login = ({ onLoginSuccess }) => {
           throw new Error('Please fill in all fields');
         }
         const data = await api.post('/auth/login', { email, password });
-        onLoginSuccess(data);
+        
+        // Save the minimal object with token temporarily in localStorage so getHeaders() includes it in the Bearer header
+        localStorage.setItem("userInfo", JSON.stringify({ _id: data._id, token: data.token }));
+        
+        // Fetch full profile credentials securely
+        const profile = await api.get('/auth/profile');
+        
+        const fullUserData = {
+          _id: data._id,
+          token: data.token,
+          name: profile.name,
+          email: profile.email,
+          role: profile.role
+        };
+        
+        onLoginSuccess(fullUserData);
         
         // Redirect based on role
-        if (data.role === 'admin') {
+        if (fullUserData.role === 'admin') {
           navigate('/admin');
         } else {
           navigate(from);
@@ -48,16 +63,32 @@ const Login = ({ onLoginSuccess }) => {
           throw new Error('Password must be at least 6 characters');
         }
         const data = await api.post('/auth/signup', { name, email, password });
-        onLoginSuccess(data);
+        
+        // Save the minimal object with token temporarily in localStorage
+        localStorage.setItem("userInfo", JSON.stringify({ _id: data._id, token: data.token }));
+        
+        // Fetch full profile credentials securely
+        const profile = await api.get('/auth/profile');
+        
+        const fullUserData = {
+          _id: data._id,
+          token: data.token,
+          name: profile.name,
+          email: profile.email,
+          role: profile.role
+        };
+        
+        onLoginSuccess(fullUserData);
 
         // Redirect based on role
-        if (data.role === 'admin') {
+        if (fullUserData.role === 'admin') {
           navigate('/admin');
         } else {
           navigate(from);
         }
       }
     } catch (err) {
+      localStorage.removeItem("userInfo");
       setError(err.message || 'An error occurred during authentication');
     } finally {
       setLoading(false);

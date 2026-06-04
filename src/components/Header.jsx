@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ShoppingBag, User, Menu, X, LogOut, ClipboardList, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,6 +9,22 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
   
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Monitor scroll to dynamically apply light vs dark glassmorphic styling
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const isBright = location.pathname !== "/" || isScrolled;
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -55,10 +71,9 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          // {/* UPDATED: Glassmorphism layout values applied below */}
           className={`mx-auto flex max-w-7xl items-center justify-between rounded-full border backdrop-blur-xl shadow-lg transition-all duration-300 md:px-4 py-2 px-3 ${
-            isProductsPage 
-              ? "border-stone-700/40 bg-[#261c16]/75 shadow-black/10 text-white" 
+            isBright 
+              ? "border-stone-200/60 bg-[#fdfcf9]/80 shadow-md text-[#362720]" 
               : "border-white/20 bg-white/10 text-white"
           }`}
         >
@@ -67,36 +82,41 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
             onClick={() => setIsMenuOpen(true)}
             type="button"
             className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors md:h-10 md:w-10 ${
-              isProductsPage 
-                ? "bg-white/5 text-stone-200 hover:bg-white/15" 
+              isBright 
+                ? "bg-[#362720]/5 text-[#362720] hover:bg-[#362720]/15" 
                 : "bg-black/20 text-white hover:bg-black/40"
             }`}
           >
             <Menu size={18} strokeWidth={1.5} />
           </button>
 
-          {/* Logo Context Title */}
+          {/* Logo Title */}
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link to="/" className="no-underline">
-              <h1 className="text-xl font-black tracking-tighter text-white transition-colors duration-300 md:text-3xl">
-                ORVÉLIA
+              <h1 className={`text-xl font-black tracking-[2px] transition-colors duration-300 md:text-3xl ${
+                isBright ? "text-[#261c16]" : "text-white"
+              }`}>
+                Al Özhan
               </h1>
             </Link>
           </div>
 
-          {/* Icon Interaction Container Control Group */}
-          <div className={`flex items-center gap-0.5 rounded-full p-0.5 transition-colors duration-300 md:gap-1 md:p-1 md:px-3 ${
-            isProductsPage ? "bg-white/5" : "bg-white/20"
+          {/* Icon Interaction Group */}
+          <div className={`flex items-center gap-0.5 rounded-full p-0.5 transition-colors duration-300 md:gap-1 md:p-1 md:px-3 relative ${
+            isBright ? "bg-[#362720]/5" : "bg-white/20"
           }`}>
+            {/* Cart Button */}
             <button 
-              className="relative p-2 text-white transition-opacity hover:opacity-70" 
+              className={`relative p-2 transition-opacity hover:opacity-70 ${
+                isBright ? "text-[#362720]" : "text-white"
+              }`} 
               onClick={onOpenCart} 
               type="button"
             >
               <ShoppingBag size={18} strokeWidth={1.5} />
               {cartCount > 0 && (
                 <span className={`absolute right-0.5 top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full text-[8px] font-bold ${
-                  isProductsPage ? "bg-[#d4af37] text-white" : "bg-white text-black"
+                  isBright ? "bg-[#d4af37] text-white" : "bg-white text-black"
                 } md:h-4 md:w-4 md:text-[9px]`}>
                   {cartCount}
                 </span>
@@ -104,17 +124,95 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
             </button>
             
             <div className={`mx-1 h-4 w-[1px] ${
-              isProductsPage ? "bg-white/10" : "bg-white/30"
+              isBright ? "bg-[#362720]/10" : "bg-white/30"
             }`} />
             
-            <button className="p-2 text-white transition-opacity hover:opacity-70" type="button">
-              <User size={18} strokeWidth={1.5} />
-            </button>
+            {/* User Dropdown Trigger */}
+            <div className="relative" ref={dropdownRef}>
+              {user ? (
+                <button 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className={`p-1 px-2 text-xs font-bold hover:opacity-80 transition-all flex items-center gap-1.5 rounded-full ${
+                    isBright ? "text-[#362720] bg-[#362720]/5" : "text-white bg-white/10"
+                  }`}
+                  type="button"
+                >
+                  <div className="w-5 h-5 rounded-full bg-[#d4af37] text-black font-extrabold flex items-center justify-center text-[10px]">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="max-w-[70px] truncate hidden sm:inline">{user.name.split(' ')[0]}</span>
+                </button>
+              ) : (
+                <Link 
+                  to="/login"
+                  className={`p-2 transition-opacity hover:opacity-70 flex items-center justify-center ${
+                    isBright ? "text-[#362720]" : "text-white"
+                  }`}
+                >
+                  <User size={18} strokeWidth={1.5} />
+                </Link>
+              )}
+
+              {/* Glassmorphism Dropdown */}
+              <AnimatePresence>
+                {isDropdownOpen && user && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-3 w-56 rounded-sm border border-stone-200 bg-white p-2 shadow-2xl text-stone-800"
+                  >
+                    <div className="px-3 py-2 border-b border-stone-100 text-left">
+                      <p className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Logged In As</p>
+                      <p className="font-semibold text-stone-800 text-xs truncate">{user.name}</p>
+                      <span className="text-[8px] uppercase tracking-widest bg-stone-100 px-1 py-0.5 rounded-xs text-stone-500 font-mono mt-0.5 inline-block">
+                        {user.role}
+                      </span>
+                    </div>
+
+                    <div className="py-1.5 space-y-0.5">
+                      {/* Track Orders */}
+                      <button
+                        onClick={() => handleDropdownItemClick('/profile')}
+                        className="w-full text-left py-2 px-3 rounded-xs text-xs flex items-center gap-2 hover:bg-stone-50 text-stone-600 hover:text-black font-medium transition-colors"
+                      >
+                        <ClipboardList className="w-4 h-4 text-[#b38f44]" />
+                        Track Orders
+                      </button>
+
+                      {/* Admin Dashboard (Admin only) */}
+                      {user.role === 'admin' && (
+                        <button
+                          onClick={() => handleDropdownItemClick('/admin')}
+                          className="w-full text-left py-2 px-3 rounded-xs text-xs flex items-center gap-2 hover:bg-amber-50 text-amber-900 font-medium transition-colors"
+                        >
+                          <ShieldAlert className="w-4 h-4 text-amber-600" />
+                          Admin Console
+                        </button>
+                      )}
+
+                      {/* Logout */}
+                      <button
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          onLogout();
+                          navigate('/');
+                        }}
+                        className="w-full text-left py-2 px-3 rounded-xs text-xs flex items-center gap-2 hover:bg-red-50 text-red-600 hover:text-red-700 font-medium transition-colors border-t border-stone-100"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Log Out
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </motion.div>
       </header>
 
-      {/* Slide-out Navigation Drawer Menu */}
+      {/* Slide-out Drawer */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
@@ -152,9 +250,22 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
                       )}
                     </div>
                   ))}
+                  {/* Logout option in drawer for mobile users */}
+                  {user && (
+                    <button
+                      onClick={() => {
+                        onLogout();
+                        setIsMenuOpen(false);
+                        navigate('/');
+                      }}
+                      className="text-left text-4xl font-black uppercase tracking-tighter text-red-600 hover:italic transition-all md:text-6xl border-t border-stone-100 pt-4"
+                    >
+                      Log Out
+                    </button>
+                  )}
                 </nav>
                 <div className="mt-auto border-t border-slate-100 pt-6">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">© 2026 Orvélia Parfums</p>
+                  <p className="text-xs uppercase tracking-widest text-slate-400">© 2026 Al Ozhan Perfumes Parfums</p>
                 </div>
               </div>
             </motion.div>

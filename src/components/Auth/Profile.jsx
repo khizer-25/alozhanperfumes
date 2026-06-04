@@ -57,10 +57,10 @@ const Profile = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[#78532f]/10 text-[#78532f] flex items-center justify-center font-bold text-lg">
-                      {user.name.charAt(0).toUpperCase()}
+                      {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-stone-800 text-sm">{user.name}</h3>
+                      <h3 className="font-semibold text-stone-800 text-sm">{user?.name || user?.email || 'User'}</h3>
                       <span className="text-[10px] uppercase font-mono tracking-widest bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded-xs">
                         {user.role}
                       </span>

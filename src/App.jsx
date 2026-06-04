@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom"; 
 import Header from "./components/Header";
 import HomePage from "./components/Home/Homepage";
@@ -10,6 +10,9 @@ import Products from "./components/Products/Products";
 import Login from "./components/Auth/Login";
 import Profile from "./components/Auth/Profile";
 import AdminDashboard from "./components/Admin/AdminDashboard";
+import { Contact } from "lucide-react";
+import ContactUs from "./components/Home/Contactus";
+import { api } from "./utils/api";
 
 function App() {
   const location = useLocation();
@@ -30,6 +33,31 @@ function App() {
     }
     return null;
   });
+
+  // Sync profile details if token exists but basic fields like name are missing
+  useEffect(() => {
+    const syncProfile = async () => {
+      if (user && !user.name) {
+        try {
+          const profile = await api.get("/auth/profile");
+          const fullUserData = {
+            ...user,
+            name: profile.name,
+            email: profile.email,
+            role: profile.role,
+          };
+          localStorage.setItem("userInfo", JSON.stringify(fullUserData));
+          setUser(fullUserData);
+        } catch (e) {
+          console.error("Failed to sync profile on load:", e);
+          // Token is likely invalid, expired, or server profile is unreachable. Clear the incomplete session.
+          localStorage.removeItem("userInfo");
+          setUser(null);
+        }
+      }
+    };
+    syncProfile();
+  }, [user]);
 
   const handleLoginSuccess = (userData) => {
     localStorage.setItem("userInfo", JSON.stringify(userData));
@@ -105,6 +133,7 @@ function App() {
         <HomePage />
         <ProductList onAddToCart={handleAddToCart} />
         <FeaturesSection />
+        <ContactUs />
       </>
     );
   };
