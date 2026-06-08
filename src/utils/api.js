@@ -1,4 +1,4 @@
-const BASE_URL = "https://alozhan-backend.onrender.com";
+const BASE_URL = "https://alozhan-backend.onrender.com/api";
 
 const getHeaders = () => {
   const headers = {

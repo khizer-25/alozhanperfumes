@@ -78,7 +78,7 @@ const ProductList = ({ onAddToCart }) => {
     const fetchLiveProducts = async () => {
       try {
         setLoading(true);
-        const data = await api.get('/api/products?pageSize=8');
+        const data = await api.get('/products?pageSize=8');
         
         // If products exist in db, use them. Otherwise, let it fallback to mock
         if (data.products && data.products.length > 0) {
