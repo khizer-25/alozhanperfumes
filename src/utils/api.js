@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = "https://alozhan-backend.onrender.com";
 
 const getHeaders = () => {
   const headers = {
