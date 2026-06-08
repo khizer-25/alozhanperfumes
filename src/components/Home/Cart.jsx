@@ -39,13 +39,13 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
 
   const handleCheckoutClick = () => {
     setError('');
+    onClose();
     if (!user) {
-      // Redirect to login if not authenticated
-      onClose();
-      navigate('/login');
+      // Redirect to login if not authenticated, keeping path history
+      navigate('/login', { state: { from: { pathname: '/checkout' } } });
     } else {
-      // Proceed to shipping details
-      setCheckoutStep('shipping');
+      // Proceed to checkout page
+      navigate('/checkout');
     }
   };
 
