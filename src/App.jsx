@@ -14,6 +14,7 @@ import { Contact } from "lucide-react";
 import ContactUs from "./components/Home/Contactus";
 import Checkout from "./components/Home/Checkout";
 import { api } from "./utils/api";
+import FloatingContactButtons from "./components/FloatingContactButtons";
 
 function App() {
   const location = useLocation();
@@ -224,6 +225,7 @@ function App() {
         </Routes>
       </main>
       
+      <FloatingContactButtons />
       <Footer />
 
       {/* 
