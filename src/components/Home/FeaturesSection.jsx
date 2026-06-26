@@ -102,30 +102,65 @@ const FeaturesSection = () => {
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#d4af37]/5 blur-[100px] rounded-full -mr-20 -mt-20" />
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
-          <div className="text-left">
-            <h2 className="text-4xl md:text-6xl font-light text-white mb-6 leading-[1.1]">
-              Artisanal fragrances <br />
-              <span className="italic font-extralight text-stone-400">engineered with precision.</span>
-            </h2>
-            <p className="text-[#d4af37] text-xs tracking-[0.3em] mb-8 uppercase font-bold">
-              The Flagship Atelier
-            </p> 
-            <p className="text-stone-300 mb-10 leading-relaxed font-light text-lg">
-              Step into a world of liquid gold. Our fragrance advisors are ready to guide you through a private consultation. Experience the textures and notes in person.
-            </p>
-           <button
-  onClick={() =>
-    window.open(
-      "https://maps.google.com/?q=17.385044,78.486671",
-      "_blank"
-    )
-  }
-  className="flex items-center gap-4 px-10 py-4 bg-[#d4af37] text-black font-bold text-xs tracking-[0.2em] uppercase hover:bg-[#a1811a] transition-colors group"
->
-  <MapPin className="w-4 h-4 group-hover:animate-bounce" />
-  FIND OUR LOCATION
-</button>
-          </div>
+         <div className="text-left flex flex-col justify-center h-full">
+
+  <h2 className="text-5xl md:text-6xl font-extralight leading-none">
+    <span className="text-white">Find Your</span>
+    <br />
+    <span className="italic text-[#d4af37]">
+      Signature Scent.
+    </span>
+  </h2>
+
+
+  {/* Gold Divider */}
+  <div className="w-20 h-[2px] bg-[#d4af37] my-8"></div>
+
+  {/* Quote */}
+  <p className="text-2xl md:text-3xl italic text-stone-300 leading-relaxed font-light">
+    “Every fragrance tells a story.
+    <br />
+    Find the one that becomes yours.”
+  </p>
+
+  {/* Store Details */}
+  <div className="border-l-2 border-[#d4af37] pl-6 mt-10 space-y-4">
+
+    <h3 className="uppercase tracking-[0.3em] text-md text-[#d4af37] font-semibold">
+      Visit Our Flagship Store
+    </h3>
+
+    <p className="text-stone-300 leading-relaxed max-w-md">
+      Experience our complete collection, receive personalized fragrance
+      guidance, and discover your signature scent.
+    </p>
+
+    <div className="flex items-center gap-3 text-white">
+      <MapPin className="w-5 h-5 text-[#d4af37]" />
+      <span>Hyderabad, Telangana</span>
+    </div>
+
+    <p className="text-stone-400 text-sm tracking-wide">
+      Mon – Sat • 10:00 AM – 8:00 PM
+    </p>
+
+  </div>
+
+  {/* Button */}
+  <button
+    onClick={() =>
+      window.open(
+        "https://maps.google.com/?q=17.385044,78.486671",
+        "_blank"
+      )
+    }
+    className="mt-10 w-fit flex items-center gap-3 px-10 py-4 bg-[#d4af37] text-black font-semibold tracking-[0.2em] uppercase hover:bg-[#b8922b] transition-all duration-300"
+  >
+    <MapPin className="w-5 h-5" />
+    FIND OUR LOCATION
+  </button>
+
+</div> 
 
           <div className="h-[550px] w-full rounded-sm overflow-hidden border border-[#d4af37]/30 shadow-2xl">
   <iframe
