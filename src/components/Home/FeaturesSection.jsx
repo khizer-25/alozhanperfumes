@@ -109,30 +109,34 @@ const FeaturesSection = () => {
             </h2>
             <p className="text-[#d4af37] text-xs tracking-[0.3em] mb-8 uppercase font-bold">
               The Flagship Atelier
-            </p>
+            </p> 
             <p className="text-stone-300 mb-10 leading-relaxed font-light text-lg">
               Step into a world of liquid gold. Our fragrance advisors are ready to guide you through a private consultation. Experience the textures and notes in person.
             </p>
-            <button className="flex items-center gap-4 px-10 py-4 bg-[#d4af37] text-black font-bold text-xs tracking-[0.2em] uppercase hover:bg-[#a1811a] transition-colors group">
-              <MapPin className="w-4 h-4 group-hover:animate-bounce" />
-              FIND OUR LOCATION
-            </button>
+           <button
+  onClick={() =>
+    window.open(
+      "https://maps.google.com/?q=17.385044,78.486671",
+      "_blank"
+    )
+  }
+  className="flex items-center gap-4 px-10 py-4 bg-[#d4af37] text-black font-bold text-xs tracking-[0.2em] uppercase hover:bg-[#a1811a] transition-colors group"
+>
+  <MapPin className="w-4 h-4 group-hover:animate-bounce" />
+  FIND OUR LOCATION
+</button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-4">
-              <div className="rounded-sm overflow-hidden h-48 grayscale hover:grayscale-0 transition-all duration-700 shadow-xl">
-                <img src="https://images.unsplash.com/photo-1608528577891-eb055944f2e7?auto=format&fit=crop&w=400&q=80" className="w-full h-full object-cover" alt="Scent 1" />
-              </div>
-              <div className="rounded-sm overflow-hidden h-64 shadow-xl border border-white/10">
-                <img src="https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=400&q=80" className="w-full h-full object-cover" alt="Scent 2" />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center">
-              <div className="rounded-sm overflow-hidden h-[400px] shadow-2xl border border-[#d4af37]/30">
-                <img src="https://images.unsplash.com/photo-1512203530485-2a6081498144?auto=format&fit=crop&w=400&q=80" className="w-full h-full object-cover" alt="Scent 3" />
-              </div>
-            </div>
+          <div className="h-[550px] w-full rounded-sm overflow-hidden border border-[#d4af37]/30 shadow-2xl">
+  <iframe
+    title="Our Store Location"
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.414263694377!2d78.486671!3d17.385044!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb99c9b0d6d3d9%3A0x8b5a6d9f4c9d9b3!2sHyderabad!5e0!3m2!1sen!2sin!4v1719999999999!5m2!1sen!2sin"
+    className="w-full h-full border-0"
+    loading="lazy"
+    allowFullScreen
+    referrerPolicy="no-referrer-when-downgrade"
+  />
+
           </div>
         </div>
       </div>
