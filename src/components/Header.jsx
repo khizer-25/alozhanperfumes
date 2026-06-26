@@ -129,7 +129,7 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
             
             {/* User Dropdown Trigger */}
             <div className="relative" ref={dropdownRef}>
-              {user ? (
+              {user && user.name ? (
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className={`p-1 px-2 text-xs font-bold hover:opacity-80 transition-all flex items-center gap-1.5 rounded-full ${
@@ -142,6 +142,10 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
                   </div>
                   <span className="max-w-[70px] truncate hidden sm:inline">{user.name.split(' ')[0]}</span>
                 </button>
+              ) : user ? (
+                <div className={`p-2 flex items-center justify-center ${isBright ? "text-[#362720]" : "text-white"}`}>
+                  <div className="w-4 h-4 rounded-full border border-stone-400 border-t-transparent animate-spin" />
+                </div>
               ) : (
                 <Link 
                   to="/login"

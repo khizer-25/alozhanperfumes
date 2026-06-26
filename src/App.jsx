@@ -12,7 +12,9 @@ import Profile from "./components/Auth/Profile";
 import AdminDashboard from "./components/Admin/AdminDashboard";
 import { Contact } from "lucide-react";
 import ContactUs from "./components/Home/Contactus";
+import Checkout from "./components/Home/Checkout";
 import { api } from "./utils/api";
+import FloatingContactButtons from "./components/FloatingContactButtons";
 
 function App() {
   const location = useLocation();
@@ -46,7 +48,8 @@ function App() {
             email: profile.email,
             role: profile.role,
           };
-          localStorage.setItem("userInfo", JSON.stringify(fullUserData));
+          // Store only _id and token in localStorage
+          localStorage.setItem("userInfo", JSON.stringify({ _id: user._id, token: user.token }));
           setUser(fullUserData);
         } catch (e) {
           console.error("Failed to sync profile on load:", e);
@@ -60,7 +63,8 @@ function App() {
   }, [user]);
 
   const handleLoginSuccess = (userData) => {
-    localStorage.setItem("userInfo", JSON.stringify(userData));
+    // Store only _id and token in localStorage
+    localStorage.setItem("userInfo", JSON.stringify({ _id: userData._id, token: userData.token }));
     setUser(userData);
   };
 
@@ -113,6 +117,19 @@ function App() {
 
   // --- ROUTE PROTECTION COMPONENTS ---
   const ProtectedRoute = ({ children }) => {
+    if (user && !user.name) {
+      return (
+        <div className="min-h-screen bg-[#fdfcf9] flex flex-col items-center justify-center font-sans antialiased text-[#362720]">
+          <div className="text-center space-y-4">
+            <p className="text-[#b38f44] text-[10px] tracking-[0.4em] uppercase font-bold animate-pulse">
+              Orvélia Parfums
+            </p>
+            <div className="w-12 h-[1px] bg-[#d4af37] mx-auto" />
+            <p className="text-xs text-stone-500 font-light animate-pulse">Verifying premium atelier session...</p>
+          </div>
+        </div>
+      );
+    }
     if (!user) {
       return <Navigate to="/login" state={{ from: location }} replace />;
     }
@@ -120,6 +137,19 @@ function App() {
   };
 
   const AdminRoute = ({ children }) => {
+    if (user && !user.name) {
+      return (
+        <div className="min-h-screen bg-[#fdfcf9] flex flex-col items-center justify-center font-sans antialiased text-[#362720]">
+          <div className="text-center space-y-4">
+            <p className="text-[#b38f44] text-[10px] tracking-[0.4em] uppercase font-bold animate-pulse">
+              Orvélia Parfums
+            </p>
+            <div className="w-12 h-[1px] bg-[#d4af37] mx-auto" />
+            <p className="text-xs text-stone-500 font-light animate-pulse">Authorizing administrative credentials...</p>
+          </div>
+        </div>
+      );
+    }
     if (!user || user.role !== "admin") {
       return <Navigate to="/" replace />;
     }
@@ -168,6 +198,21 @@ function App() {
             } 
           />
 
+          <Route 
+            path="/checkout" 
+            element={
+              <ProtectedRoute>
+                <Checkout 
+                  cartItems={cartItems} 
+                  clearCart={handleClearCart} 
+                  onUpdateQuantity={handleUpdateQuantity}
+                  onRemoveItem={handleRemoveItem}
+                  user={user}
+                />
+              </ProtectedRoute>
+            } 
+          />
+
           {/* Secure Admin Control Console Routes */}
           <Route 
             path="/admin" 
@@ -180,6 +225,7 @@ function App() {
         </Routes>
       </main>
       
+      <FloatingContactButtons />
       <Footer />
 
       {/* 
