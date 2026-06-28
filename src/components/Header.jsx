@@ -59,12 +59,20 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
   } else {
     menuLinks.push({ name: "Login", path: "/login" });
   }
-
-  const handleDropdownItemClick = (path) => {
+const handleDropdownItemClick = (path) => {
     setIsDropdownOpen(false);
     navigate(path);
   };
+<div className="mb-14">
+    <h2 className="text-3xl font-light tracking-[8px] text-[#261c16]">
+        Al Özhan
+    </h2>
 
+    <p className="mt-2 text-xs tracking-[4px] uppercase text-stone-400">
+        Fine Fragrances
+    </p>
+</div>
+  
   return (
     <>
       <header className="fixed top-4 left-0 z-50 w-full px-4 md:top-6 md:px-6">
@@ -227,30 +235,77 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
             />
             <motion.div
               variants={sidebarVariants} initial="closed" animate="opened" exit="closed"
-              className="fixed top-0 left-0 z-[70] h-screen w-full bg-white p-8 shadow-2xl sm:max-w-md md:p-12"
+              className="fixed top-0 left-0 z-[70] h-screen w-[280px] bg-[#fdfcf9] border-r border-stone-200 px-6 py-10 shadow-2xl"
             >
               <div className="flex h-full flex-col">
-                <button onClick={() => setIsMenuOpen(false)} className="self-end text-black hover:rotate-90 transition-transform">
-                  <X size={32} strokeWidth={1} />
+                <button onClick={() => setIsMenuOpen(false)} className="self-end rounded-full p-2 hover:bg-stone-100 transition-all duration-300">
+                  <X size={24} strokeWidth={1.5} />
                 </button>
-                <nav className="mt-12 flex flex-col gap-4 md:gap-6">
+                
+                <nav className="flex flex-col space-y-1">
                   {menuLinks.map((link) => (
                     <div key={link.name}>
                       {link.action ? (
-                        <button
-                          onClick={() => { link.action(); setIsMenuOpen(false); }}
-                          className="text-left text-4xl font-black uppercase tracking-tighter text-black hover:italic transition-all md:text-6xl"
-                        >
-                          {link.name}
-                        </button>
-                      ) : (
+  <button
+    onClick={() => {
+      link.action();
+      setIsMenuOpen(false);
+    }}
+    className="
+group
+flex
+w-full
+items-center
+justify-between
+rounded-xl
+px-4
+py-4
+text-2xl
+md:text-3xl
+font-medium
+tracking-wide
+text-[#362720]
+transition-all
+duration-300
+hover:italic
+hover:text-[#b38f44]
+"
+  >
+    <span>{link.name}</span>
+    <span className="opacity-0 group-hover:opacity-100 transition">
+      →
+    </span>
+  </button>
+) : (
                         <Link
-                          to={link.path}
-                          onClick={() => setIsMenuOpen(false)}
-                          className="text-4xl font-black uppercase tracking-tighter text-black no-underline hover:italic transition-all md:text-6xl"
-                        >
-                          {link.name}
-                        </Link>
+  to={link.path}
+  onClick={() => setIsMenuOpen(false)}
+  className="
+    group
+    flex
+    w-full
+    items-center
+    justify-between
+    rounded-xl
+    px-4
+    py-4
+    text-2xl
+    md:text-3xl
+    font-medium
+    tracking-wide
+    text-[#362720]
+    transition-all
+    duration-300
+    hover:italic
+    hover:text-[#b38f44]
+  "
+>
+  <span>{link.name}</span>
+
+  <span className="opacity-0 group-hover:opacity-100 transition">
+    →
+  </span>
+</Link>
                       )}
                     </div>
                   ))}
@@ -262,14 +317,26 @@ function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
                         setIsMenuOpen(false);
                         navigate('/');
                       }}
-                      className="text-left text-4xl font-black uppercase tracking-tighter text-red-600 hover:italic transition-all md:text-6xl border-t border-stone-100 pt-4"
-                    >
+                      className="
+mt-6
+border-t
+pt-6
+text-left
+text-2xl
+md:text-3xl
+font-medium
+tracking-wide
+text-red-600
+hover:italic
+transition-all
+duration-300
+">
                       Log Out
                     </button>
                   )}
                 </nav>
                 <div className="mt-auto border-t border-slate-100 pt-6">
-                  <p className="text-xs uppercase tracking-widest text-slate-400">© 2026 Al Ozhan Perfumes Parfums</p>
+                 <p className="text-[10px] uppercase tracking-[3px] text-slate-400">© 2026 Al Ozhan Perfumes</p>
                 </div>
               </div>
             </motion.div>
