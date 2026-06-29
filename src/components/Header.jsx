@@ -6,7 +6,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  
+  const [animateItalic, setAnimateItalic] = useState(true);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,6 +72,22 @@ const handleDropdownItemClick = (path) => {
         Fine Fragrances
     </p>
 </div>
+
+useEffect(() => {
+  let interval;
+
+  if (isMenuOpen) {
+    setAnimateItalic(true); // Start italic
+
+    interval = setInterval(() => {
+      setAnimateItalic((prev) => !prev);
+    }, 1000);
+  } else {
+    setAnimateItalic(true);
+  }
+
+  return () => clearInterval(interval);
+}, [isMenuOpen]);
   
   return (
     <>
@@ -238,9 +254,34 @@ const handleDropdownItemClick = (path) => {
               className="fixed top-0 left-0 z-[70] h-screen w-[280px] bg-[#fdfcf9] border-r border-stone-200 px-6 py-10 shadow-2xl"
             >
               <div className="flex h-full flex-col">
-                <button onClick={() => setIsMenuOpen(false)} className="self-end rounded-full p-2 hover:bg-stone-100 transition-all duration-300">
-                  <X size={24} strokeWidth={1.5} />
-                </button>
+                <motion.button
+  onClick={() => setIsMenuOpen(false)}
+  whileHover={{
+    rotate: 90,
+    scale: 1.08,
+  }}
+  whileTap={{
+    scale: 0.92,
+  }}
+  transition={{
+    duration: 0.35,
+    ease: "easeInOut",
+  }}
+  className="
+    self-end
+    flex
+    h-8
+    w-8
+    items-center
+    justify-center
+    rounded-full
+    text-[#362720]
+    hover:bg-[#362720]
+    hover:text-white
+  "
+>
+  <X size={18} strokeWidth={2} />
+</motion.button>
                 
                 <nav className="flex flex-col space-y-1">
                   {menuLinks.map((link) => (
@@ -251,7 +292,7 @@ const handleDropdownItemClick = (path) => {
       link.action();
       setIsMenuOpen(false);
     }}
-    className="
+className={`
 group
 flex
 w-full
@@ -264,47 +305,67 @@ text-2xl
 md:text-3xl
 font-medium
 tracking-wide
-text-[#362720]
 transition-all
-duration-300
-hover:italic
-hover:text-[#b38f44]
-"
+duration-700
+text-[#362720]
+hover:text-[#C8A24C]
+${animateItalic ? "italic" : "not-italic"}
+`}
   >
     <span>{link.name}</span>
-    <span className="opacity-0 group-hover:opacity-100 transition">
-      →
-    </span>
+    <span
+  className="
+    opacity-0
+    translate-x-[-8px]
+    group-hover:opacity-100
+    group-hover:translate-x-0
+    transition-all
+    duration-300
+    text-[#C8A24C]
+  "
+>
+  →
+</span>
   </button>
 ) : (
                         <Link
   to={link.path}
   onClick={() => setIsMenuOpen(false)}
-  className="
-    group
-    flex
-    w-full
-    items-center
-    justify-between
-    rounded-xl
-    px-4
-    py-4
-    text-2xl
-    md:text-3xl
-    font-medium
-    tracking-wide
-    text-[#362720]
-    transition-all
-    duration-300
-    hover:italic
-    hover:text-[#b38f44]
-  "
+  className={`
+group
+flex
+w-full
+items-center
+justify-between
+rounded-xl
+px-4
+py-4
+text-2xl
+md:text-3xl
+font-medium
+tracking-wide
+transition-all
+duration-700
+text-[#362720]
+hover:text-[#C8A24C]
+${animateItalic ? "italic" : "not-italic"}
+`}
 >
   <span>{link.name}</span>
 
-  <span className="opacity-0 group-hover:opacity-100 transition">
-    →
-  </span>
+  <span
+  className="
+    opacity-0
+    translate-x-[-8px]
+    group-hover:opacity-100
+    group-hover:translate-x-0
+    transition-all
+    duration-300
+    text-[#C8A24C]
+  "
+>
+  →
+</span>
 </Link>
                       )}
                     </div>
