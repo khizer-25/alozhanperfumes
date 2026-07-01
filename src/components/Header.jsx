@@ -2,11 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { ShoppingBag, User, Menu, X, LogOut, ClipboardList, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import logo from "../assets/alozhan.png";
 
 function Header({ cartCount, onOpenCart, isProductsPage, user, onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [animateItalic, setAnimateItalic] = useState(true);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -73,22 +73,8 @@ const handleDropdownItemClick = (path) => {
     </p>
 </div>
 
-useEffect(() => {
-  let interval;
 
-  if (isMenuOpen) {
-    setAnimateItalic(true); // Start italic
-
-    interval = setInterval(() => {
-      setAnimateItalic((prev) => !prev);
-    }, 1000);
-  } else {
-    setAnimateItalic(true);
-  }
-
-  return () => clearInterval(interval);
-}, [isMenuOpen]);
-  
+ 
   return (
     <>
       <header className="fixed top-4 left-0 z-50 w-full px-4 md:top-6 md:px-6">
@@ -254,34 +240,35 @@ useEffect(() => {
               className="fixed top-0 left-0 z-[70] h-screen w-[280px] bg-[#fdfcf9] border-r border-stone-200 px-6 py-10 shadow-2xl"
             >
               <div className="flex h-full flex-col">
-                <motion.button
-  onClick={() => setIsMenuOpen(false)}
-  whileHover={{
-    rotate: 90,
-    scale: 1.08,
-  }}
-  whileTap={{
-    scale: 0.92,
-  }}
-  transition={{
-    duration: 0.35,
-    ease: "easeInOut",
-  }}
-  className="
-    self-end
-    flex
-    h-8
-    w-8
-    items-center
-    justify-center
-    rounded-full
-    text-[#362720]
-    hover:bg-[#362720]
-    hover:text-white
-  "
->
-  <X size={18} strokeWidth={2} />
-</motion.button>
+                <div className="flex flex-col items-center mb-8 relative">
+  {/* Decorative Border Image */}
+  
+ <div className="flex justify-center -mx-6 -mt-11 mb-0">
+  <img
+    src={logo}
+    alt="Al Ozhan"
+    className="w-[340px] h-[120px] object-contain"
+  />
+</div>
+  {/* Close Button */}
+  <motion.button
+    onClick={() => setIsMenuOpen(false)}
+    whileHover={{
+      rotate: 90,
+      scale: 1.08,
+    }}
+    whileTap={{
+      scale: 0.92,
+    }}
+    transition={{
+      duration: 0.35,
+      ease: "easeInOut",
+    }}
+    className="mt-24 ml-56 flex h-8 w-8 items-center justify-center rounded-full text-[#362720] hover:bg-[#362720] hover:text-white"
+  >
+    <X size={28} strokeWidth={2} />
+  </motion.button>
+</div>
                 
                 <nav className="flex flex-col space-y-1">
                   {menuLinks.map((link) => (
@@ -299,18 +286,18 @@ w-full
 items-center
 justify-between
 rounded-xl
-px-4
+px-0
 py-4
 text-2xl
-md:text-3xl
+md:text-4xl
 font-medium
 tracking-wide
 transition-all
 duration-700
 text-[#362720]
 hover:text-[#C8A24C]
-${animateItalic ? "italic" : "not-italic"}
-`}
+italic`
+}
   >
     <span>{link.name}</span>
     <span
@@ -338,17 +325,17 @@ w-full
 items-center
 justify-between
 rounded-xl
-px-4
+px-0
 py-4
 text-2xl
-md:text-3xl
+md:text-4xl
 font-medium
 tracking-wide
 transition-all
 duration-700
 text-[#362720]
 hover:text-[#C8A24C]
-${animateItalic ? "italic" : "not-italic"}
+italic
 `}
 >
   <span>{link.name}</span>
