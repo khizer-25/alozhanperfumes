@@ -264,7 +264,7 @@ const handleDropdownItemClick = (path) => {
       duration: 0.35,
       ease: "easeInOut",
     }}
-    className="mt-24 ml-56 flex h-8 w-8 items-center justify-center rounded-full text-[#362720] hover:bg-[#362720] hover:text-white"
+    className="mt-0 ml-56 flex h-8 w-8 items-center justify-center rounded-full text-[#362720] hover:bg-[#362720] hover:text-white"
   >
     <X size={28} strokeWidth={2} />
   </motion.button>
