@@ -10,11 +10,11 @@ import Products from "./components/Products/Products";
 import Login from "./components/Auth/Login";
 import Profile from "./components/Auth/Profile";
 import AdminDashboard from "./components/Admin/AdminDashboard";
-import { Contact } from "lucide-react";
 import ContactUs from "./components/Home/Contactus";
 import Checkout from "./components/Home/Checkout";
 import { api } from "./utils/api";
 import FloatingContactButtons from "./components/FloatingContactButtons";
+import FloatingControls from "./components/FloatingControls";
 
 function App() {
   const location = useLocation();
@@ -241,6 +241,11 @@ function App() {
         clearCart={handleClearCart}
         user={user}
       />
+      <FloatingControls
+  cartItems={cartItems}
+  onOpenCart={() => setIsCartOpen(true)}
+  onAddToCart={handleAddToCart}
+/>
     </div>
   );
 }

@@ -141,7 +141,7 @@ const ProductList = ({ onAddToCart }) => {
                 />
               ) : (
                 <img
-                  src={`http://localhost:5000${product.image}`}
+                  src={`https://alozhan-backend.onrender.com${product.image}`}
                   alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
                 />
