@@ -4,16 +4,19 @@ import {
   Phone,
   Instagram,
   X,
+  Sparkles,
 } from "lucide-react";
+import Chatbot from "./Chatbot";
 import { FaWhatsapp } from "react-icons/fa";
 
-function FloatingContactButtons() {
+function FloatingContactButtons({ onAddToCart }) {
   const [isOpen, setIsOpen] = useState(false);
-
+const [isChatOpen, setIsChatOpen] = useState(false);
   const whatsappMessage =
     "Hello, I'm interested in Al Ozhan Perfumes. Could you share your collection and prices?";
 
   return (
+    <>
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {/* Contact Options */}
       <div
@@ -23,6 +26,22 @@ function FloatingContactButtons() {
             : "pointer-events-none translate-y-5 opacity-0"
         }`}
       >
+        {/* AI Assistant */}
+<div className="group relative">
+  <button
+    onClick={() => {
+      setIsOpen(false);      // close menu
+      setIsChatOpen(true);   // open chatbot
+    }}
+    className="flex h-14 w-14 items-center justify-center rounded-full bg-[#D4AF37] text-black shadow-xl transition-all duration-300 hover:scale-110"
+  >
+    <Sparkles size={24} />
+  </button>
+
+  <span className="absolute right-16 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-lg opacity-0 transition-all duration-300 group-hover:opacity-100">
+    AI Assistant
+  </span>
+</div>
         {/* WhatsApp */}
         <div className="group relative">
           <a
@@ -92,7 +111,15 @@ function FloatingContactButtons() {
   </span>
 </div>
     </div>
+    <Chatbot
+    isOpen={isChatOpen}
+    onClose={() => setIsChatOpen(false)}
+    onAddToCart={onAddToCart}
+/>
+</>
+    
   );
 }
+
 
 export default FloatingContactButtons;

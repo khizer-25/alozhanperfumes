@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, MessageSquare } from "lucide-react";
-import Chatbot from "./Chatbot";
+
 
 function FloatingControls({ cartItems, onOpenCart, onAddToCart }) {
   const location = useLocation();
-  const [isChatOpen, setIsChatOpen] = useState(false);
+ 
 
   // Determine if floating controls should be hidden on specific routes
   const hideControls =
@@ -73,36 +73,12 @@ function FloatingControls({ cartItems, onOpenCart, onAddToCart }) {
             </AnimatePresence>
           </div>
 
-          {/* AI Chatbot Floating Button (Bottom Right) */}
-          <div className={`ml-auto pointer-events-auto transition-all duration-500 ${hasCartItems ? "mb-20 sm:mb-0" : ""}`}>
-            <motion.button
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-14 h-14 bg-[#1a1512] hover:bg-[#26201c] text-[#d4af37] rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.5),_0_0_20px_rgba(212,175,55,0.2)] transition-all duration-300 relative group cursor-pointer border border-[#d4af37]/40"
-            >
-              {/* Pulsing ring matching luxury branding */}
-              <span className="absolute inset-0 rounded-full bg-[#d4af37]/20 animate-ping pointer-events-none" />
-
-              {/* Chatbot Icon */}
-              <MessageSquare className="w-6 h-6 stroke-[1.75]" />
-
-              {/* Premium tooltip/label on hover */}
-              <span className="absolute right-16 top-1/2 -translate-y-1/2 bg-[#1a1512] text-[#d4af37] text-[10px] tracking-[0.2em] uppercase py-2.5 px-4 rounded-sm border border-[#d4af37]/30 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none font-bold">
-                Atelier AI Scent Assistant
-              </span>
-            </motion.button>
-          </div>
+         
 
         </div>
       </div>
 
-      {/* Chatbot overlay */}
-      <Chatbot
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        onAddToCart={onAddToCart}
-      />
+      
     </>
   );
 }
