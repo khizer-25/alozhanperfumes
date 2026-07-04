@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingBag, Eye, Star, Grid3X3, ArrowUpDown, X } from 'lucide-react';
-import { products as localProducts } from '../../data/products';
 import { api } from '../../utils/api';
 
 const Products = ({ onAddToCart }) => {
-  const [products, setProducts] = useState(localProducts);
+  const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
@@ -25,16 +24,15 @@ const Products = ({ onAddToCart }) => {
         // Request products from backend (pageSize=100 ensures we grab added ones too)
         const data = await api.get('/products?pageSize=100');
         
-        if (data.products && data.products.length > 0) {
-          // Normalize matching structures (e.g. id field)
-          const normalized = data.products.map(p => ({
-            ...p,
-            id: p._id, // Assign database id to react key
-          }));
-          setProducts(normalized);
-        }
+        const normalized = (data.products || []).map((p) => ({
+  ...p,
+  id: p._id,
+}));
+
+setProducts(normalized);
       } catch (err) {
-        console.warn('API connection failed or timed out. Falling back to signature mock collections:', err.message);
+       console.error("Failed to fetch products:", err);
+setError("Unable to load products.");
       } finally {
         setLoading(false);
       }
