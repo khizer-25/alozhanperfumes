@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { api } from "../../utils/api";
 // import FilterBar from "../components/FilterBar";
-import { products } from "../../data/products"; // Ensure this path is correct
 // import { layoutClasses, textClasses } from "../styles/uiClasses";
-
-const PRODUCTS_PER_PAGE = 8;
 
 function HomePage({ onAddToCart }) {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -13,48 +11,54 @@ function HomePage({ onAddToCart }) {
   const [currentPage, setCurrentPage] = useState(1);
   const heroRef = useRef(null);
   const textRef = useRef(null);
+  const [products, setProducts] = useState([]);
+const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const tl = gsap.timeline();
-    tl.fromTo(
-      heroRef.current,
-      { opacity: 0 },
-      { opacity: 1, duration: 1.2, ease: "power2.inOut" }
-    ).fromTo(
-      textRef.current,
-      { y: 50, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1, ease: "power3.out" },
-      "-=0.6"
-    );
-  }, []);
+  const tl = gsap.timeline();
 
-  const categories = useMemo(
-    () => [...new Set(products.map((product) => product.category))],
-    []
+  tl.fromTo(
+    heroRef.current,
+    { opacity: 0 },
+    { opacity: 1, duration: 1.2, ease: "power2.inOut" }
+  ).fromTo(
+    textRef.current,
+    { y: 50, opacity: 0 },
+    { y: 0, opacity: 1, duration: 1, ease: "power3.out" },
+    "-=0.6"
   );
+},[]);
+  
+  useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
 
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
-    if (selectedCategory !== "All") {
-      result = result.filter((product) => product.category === selectedCategory);
-    }
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter((product) => product.name.toLowerCase().includes(query));
-    }
-    if (sortOrder === "low-high") {
-      result.sort((a, b) => a.price - b.price);
-    } else if (sortOrder === "high-low") {
-      result.sort((a, b) => b.price - a.price);
-    }
-    return result;
-  }, [searchQuery, selectedCategory, sortOrder]);
+      const data = await api.get("/products?pageSize=100");
 
-  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
-  const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
-    return filteredProducts.slice(start, start + PRODUCTS_PER_PAGE);
-  }, [filteredProducts, currentPage]);
+      const normalized = (data.products || []).map((p) => ({
+        ...p,
+        id: p._id,
+      }));
+
+      setProducts(normalized);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProducts();
+}, []);
+
+ const categories = useMemo(
+  () => ["All", ...new Set(products.map((product) => product.category))],
+  [products]
+);
+
+
+  
 
   useEffect(() => {
     setCurrentPage(1);
