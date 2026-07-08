@@ -15,6 +15,7 @@ import Checkout from "./components/Home/Checkout";
 import { api } from "./utils/api";
 import FloatingContactButtons from "./components/FloatingContactButtons";
 import FloatingControls from "./components/FloatingControls";
+import ProductDetails from "./components/Products/ProductDetails";
 
 function App() {
   const location = useLocation();
@@ -244,7 +245,10 @@ const existingItem = prevItems.find(
             path="*" 
             element={<Navigate to="/" 
             replace />} />
-            <Route path="/products/:id" element={<ProductDetails />} />
+           <Route
+  path="/products/:id"
+  element={<ProductDetails onAddToCart={handleAddToCart} />}
+/>
           
         </Routes>
         
