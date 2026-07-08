@@ -1,19 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { api } from "../../utils/api";
-// import FilterBar from "../components/FilterBar";
-// import { layoutClasses, textClasses } from "../styles/uiClasses";
 
 function HomePage({ onAddToCart }) {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState("default");
-  const [currentPage, setCurrentPage] = useState(1);
+  
   const heroRef = useRef(null);
   const textRef = useRef(null);
-  const [products, setProducts] = useState([]);
-const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
   const tl = gsap.timeline();
 
@@ -29,41 +21,6 @@ const [loading, setLoading] = useState(true);
   );
 },[]);
   
-  useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-
-      const data = await api.get("/products?pageSize=100");
-
-      const normalized = (data.products || []).map((p) => ({
-        ...p,
-        id: p._id,
-      }));
-
-      setProducts(normalized);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchProducts();
-}, []);
-
- const categories = useMemo(
-  () => ["All", ...new Set(products.map((product) => product.category))],
-  [products]
-);
-
-
-  
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedCategory, searchQuery, sortOrder]);
-
   return (
     <>
       {/* HERO SECTION - REFRESHED WITH MOISTURE/DROPLETS AESTHETIC */}
