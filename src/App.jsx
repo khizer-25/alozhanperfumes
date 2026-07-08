@@ -69,12 +69,20 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userInfo");
-    setUser(null);
-  };
+  localStorage.removeItem("userInfo");
+  localStorage.removeItem("cartItems");
+  setCartItems([]);
+  setUser(null);
+};
 
   // --- E-COMMERCE CART STATES ---
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+  const savedCart = localStorage.getItem("cartItems");
+  return savedCart ? JSON.parse(savedCart) : [];
+});
+useEffect(() => {
+  localStorage.setItem("cartItems", JSON.stringify(cartItems));
+}, [cartItems]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Dynamically calculate total individual units for the navbar icon badge
@@ -84,14 +92,23 @@ function App() {
   const handleAddToCart = (product) => {
     setCartItems((prevItems) => {
       // Support both live database products (_id) and static mock products (id)
-      const productId = product._id || product.id;
-      const existingItem = prevItems.find((item) => (item._id || item.id) === productId);
+      const productId = product._id;
+
+const existingItem = prevItems.find(
+  (item) => item._id === productId
+);
       if (existingItem) {
         return prevItems.map((item) =>
-          (item._id || item.id) === productId ? { ...item, quantity: item.quantity + 1 } : item
+        item._id === productId ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prevItems, { ...product, id: productId, quantity: 1 }];
+      return [
+  ...prevItems,
+  {
+    ...product,
+    quantity: 1,
+  },
+];
     });
     // Smoothly auto-open the right sidebar drawer on item addition
     setIsCartOpen(true);
@@ -103,13 +120,15 @@ function App() {
       return;
     }
     setCartItems((prevItems) =>
-      prevItems.map((item) => (item.id === id ? { ...item, quantity: newQuantity } : item))
+      prevItems.map((item) => (item._id === id ? { ...item, quantity: newQuantity } : item))
     );
   };
 
-  const handleRemoveItem = (id) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
-  };
+ const handleRemoveItem = (_id) => {
+  setCartItems((prev) =>
+    prev.filter((item) => item._id !== _id)
+  );
+};
 
   const handleClearCart = () => {
     setCartItems([]);
@@ -220,9 +239,15 @@ function App() {
               <AdminRoute>
                 <AdminDashboard />
               </AdminRoute>
-            } 
-          />
+            }/> 
+            <Route 
+            path="*" 
+            element={<Navigate to="/" 
+            replace />} />
+            <Route path="/products/:id" element={<ProductDetails />} />
+          
         </Routes>
+        
       </main>
       
       <FloatingContactButtons />

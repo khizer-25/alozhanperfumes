@@ -39,14 +39,13 @@ const Login = ({ onLoginSuccess }) => {
         const profile = await api.get('/auth/profile');
         
         const fullUserData = {
-          _id: data._id,
-          token: data.token,
-          name: profile.name,
-          email: profile.email,
-          role: profile.role
-        };
-        
-        onLoginSuccess(fullUserData);
+  ...profile,
+  token: data.token,
+};
+
+localStorage.setItem("userInfo", JSON.stringify(fullUserData));
+
+onLoginSuccess(fullUserData);
         
         // Redirect based on role
         if (fullUserData.role === 'admin') {
@@ -71,14 +70,13 @@ const Login = ({ onLoginSuccess }) => {
         const profile = await api.get('/auth/profile');
         
         const fullUserData = {
-          _id: data._id,
-          token: data.token,
-          name: profile.name,
-          email: profile.email,
-          role: profile.role
-        };
-        
-        onLoginSuccess(fullUserData);
+  ...profile,
+  token: data.token,
+};
+
+localStorage.setItem("userInfo", JSON.stringify(fullUserData));
+
+onLoginSuccess(fullUserData);
 
         // Redirect based on role
         if (fullUserData.role === 'admin') {
@@ -193,13 +191,7 @@ const Login = ({ onLoginSuccess }) => {
               </div>
             </div>
 
-            {/* Helper Notice for Sign Up */}
-            {!isLogin && (
-              <p className="text-[10px] text-stone-400 leading-normal flex items-start gap-1.5 mt-1 bg-stone-50 p-2.5 rounded-sm border border-stone-100">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#b38f44] shrink-0" />
-                <span>Note: To facilitate quick setup, the first user registered in this system is automatically configured as the **Store Administrator**.</span>
-              </p>
-            )}
+          
 
             {/* Submission Button */}
             <button

@@ -24,12 +24,7 @@ const Products = ({ onAddToCart }) => {
         // Request products from backend (pageSize=100 ensures we grab added ones too)
         const data = await api.get('/products?pageSize=100');
         
-        const normalized = (data.products || []).map((p) => ({
-  ...p,
-  id: p._id,
-}));
-
-setProducts(normalized);
+        setProducts(data.products || []);
       } catch (err) {
        console.error("Failed to fetch products:", err);
 setError("Unable to load products.");
@@ -42,30 +37,69 @@ setError("Unable to load products.");
   }, []);
 
   // --- Dynamic Category Aggregation ---
-  const categories = ['All', ...new Set(products.map(p => p.category))];
+const categories = [
+    "All",
+    ...new Set(
+        products
+            .map(product => product.category)
+            .filter(Boolean)
+    )
+];
 
   // Helper to strip '$' if price is supplied as a string instead of number
   const cleanPrice = (price) => {
-    if (typeof price === 'number') return price;
-    return parseFloat(price.replace(/[^0-9.-]+/g, '')) || 0;
-  };
+    if (typeof price === "number") return price;
+    if (!price) return 0;
+
+    return parseFloat(
+        String(price).replace(/[^0-9.-]+/g, "")
+    ) || 0;
+};
 
   // --- Filter and Sort Core Logic ---
   const filteredProducts = products
     .filter((product) => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            product.category.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch =
+    (product.name || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+    (product.category || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
       const matchesPrice = cleanPrice(product.price) <= priceRange;
 
       return matchesSearch && matchesCategory && matchesPrice;
     })
     .sort((a, b) => {
+      if (sortBy === "featured") {
+    return new Date(b.createdAt) - new Date(a.createdAt);
+}
       if (sortBy === 'price-low') return cleanPrice(a.price) - cleanPrice(b.price);
       if (sortBy === 'price-high') return cleanPrice(b.price) - cleanPrice(a.price);
-      if (sortBy === 'rating') return b.rating - a.rating;
-      return a.id - b.id; // Featured default sorting
+      if (sortBy === "rating") {
+    return (b.rating || 0) - (a.rating || 0);
+}
+      return 0;
     });
+
+      if (loading) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-[#fdfcf9]">
+            <p className="text-stone-600 tracking-widest uppercase text-sm">
+                Loading Products...
+            </p>
+        </div>
+    );}
+    if (error) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-[#fdfcf9]">
+            <p className="text-red-600 text-sm">
+                {error}
+            </p>
+        </div>
+    );
+}
 
   return (
     <div className="min-h-screen bg-[#fdfcf9] pt-32 pb-24 px-6 font-sans antialiased text-[#362720]">
@@ -109,7 +143,7 @@ setError("Unable to load products.");
                 onChange={(e) => setPriceRange(Number(e.target.value))}
                 className="accent-[#d4af37] bg-stone-200 h-1 flex-grow rounded-sm cursor-pointer"
               />
-              <span className="text-sm font-mono text-[#b38f44] font-semibold">${priceRange}</span>
+              <span className="text-sm font-mono text-[#b38f44] font-semibold">₹{priceRange}</span>
             </div>
 
             {/* Dropdown Sorter Selector */}
@@ -158,7 +192,7 @@ setError("Unable to load products.");
             {filteredProducts.map((product) => (
               <motion.div
                 layout
-                key={product.id}
+                key={product._id}
                 initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.92 }}
@@ -168,19 +202,11 @@ setError("Unable to load products.");
                 {/* Visual Imagery Box Container */}
                 <div className="h-72 overflow-hidden relative bg-stone-100">
                   <div className="absolute inset-0 bg-stone-900/5 group-hover:bg-transparent transition-colors duration-500 z-10" />
-                  {product.image.startsWith('http') ? (
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
-                    />
-                  ) : (
-                    <img 
-                      src={`http://localhost:5000${product.image}`} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
-                    />
-                  )}
+                  <img
+  src={product.image}
+  alt={product.name}
+  className="w-full h-full object-cover transition-transform duration-[1.2s] scale-105 group-hover:scale-100"
+/>
                   {/* Floating Size Tag */}
                   {product.size && (
                     <span className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md text-[10px] tracking-widest font-mono text-stone-700 px-2 py-0.5 rounded-xs border border-stone-200/50 z-20">
@@ -214,16 +240,16 @@ setError("Unable to load products.");
                       {[...Array(5)].map((_, i) => (
                         <Star 
                           key={i} 
-                          className={`w-3 h-3 ${i < Math.floor(product.rating || 5) ? 'fill-[#d4af37] text-[#d4af37]' : 'text-stone-200'}`} 
+                          className={`w-3 h-3 ${i < Math.floor(product.rating || 0) ? 'fill-[#d4af37] text-[#d4af37]' : 'text-stone-200'}`} 
                         />
                       ))}
-                      <span className="text-[10px] text-stone-400 font-mono ml-1">({product.rating || '5.0'})</span>
+                      <span className="text-[10px] text-stone-400 font-mono ml-1">({product.rating ? product.rating : "0"})</span>
                     </div>
                   </div>
 
                   <div>
                     <p className="text-lg font-light text-stone-900 mb-4 tracking-wider">
-                      {typeof product.price === 'number' ? `$${product.price}` : product.price}
+                     ₹{cleanPrice(product.price).toLocaleString("en-IN")}
                     </p>
 
                     {/* Fully Functional Add To Cart Action Hook */}
@@ -274,11 +300,11 @@ setError("Unable to load products.");
               </button>
               
               <div className="w-full md:w-1/2 h-64 md:h-auto bg-stone-100">
-                {selectedProduct.image.startsWith('http') ? (
-                  <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover" />
-                ) : (
-                  <img src={`http://localhost:5000${selectedProduct.image}`} alt={selectedProduct.name} className="w-full h-full object-cover" />
-                )}
+                <img
+  src={selectedProduct.image}
+  alt={selectedProduct.name}
+  className="w-full h-full object-cover"
+/>
               </div>
               
               <div className="w-full md:w-1/2 p-6 flex flex-col justify-between">
@@ -288,14 +314,14 @@ setError("Unable to load products.");
                   
                   <div className="flex items-center gap-1 mb-4">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(selectedProduct.rating || 5) ? 'fill-[#d4af37] text-[#d4af37]' : 'text-stone-200'}`} />
+                      <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(selectedProduct.rating ?? '0') ? 'fill-[#d4af37] text-[#d4af37]' : 'text-stone-200'}`} />
                     ))}
-                    <span className="text-xs text-stone-500 font-mono ml-2">({selectedProduct.rating || '5.0'})</span>
+                    <span className="text-xs text-stone-500 font-mono ml-2">({selectedProduct.rating ?? '0'})</span>
                   </div>
                   
                   <p className="text-sm text-stone-600 font-light leading-relaxed mb-4">
-                    Experience an curated premium arrangement composed of rare structural compounds, custom configured for luxury standard endurance.
-                  </p>
+    {selectedProduct.description || "No description available."}
+</p>
                   
                   {selectedProduct.size && (
                     <div className="text-xs text-stone-500 font-mono mb-2">
@@ -306,7 +332,7 @@ setError("Unable to load products.");
 
                 <div className="mt-6 border-t border-stone-100 pt-4">
                   <div className="text-2xl font-light text-stone-900 mb-4">
-                    {typeof selectedProduct.price === 'number' ? `$${selectedProduct.price}` : selectedProduct.price}
+                    ₹{cleanPrice(selectedProduct.price).toLocaleString("en-IN")}
                   </div>
                   <button
                     onClick={() => {

@@ -22,7 +22,10 @@ const Profile = () => {
       const ordersList = await api.get('/orders/myorders');
       setOrders(ordersList);
     } catch (err) {
-      setError(err.message || 'Failed to sync your account profile data.');
+    setError(
+  err.message ||
+  "Unable to load your profile. Please try again."
+); 
     } finally {
       setLoading(false);
     }
@@ -107,7 +110,7 @@ const Profile = () => {
 
               {loading ? (
                 <div className="text-center py-16 text-stone-500 text-xs tracking-widest">
-                  SYNCING LIVE VAULT ORDERS...
+                  Loading your orders...
                 </div>
               ) : error ? (
                 <div className="text-center py-12 text-red-700 text-xs bg-red-50 p-4 border border-red-200 rounded-sm">
@@ -116,10 +119,9 @@ const Profile = () => {
               ) : orders.length === 0 ? (
                 <div className="text-center py-16 opacity-40">
                   <ShoppingBag size={42} strokeWidth={1} className="mb-3 text-[#d4af37] mx-auto" />
-                  <p className="text-xs tracking-wider uppercase font-medium text-stone-600">No orders discovered</p>
-                  <p className="text-[10px] text-stone-400 font-light mt-1 max-w-xs mx-auto">
-                    Blends purchased from Orvélia checkout will appear here instantly for full tracking and courier monitoring.
-                  </p>
+                  <p className="text-xs tracking-wider uppercase font-medium text-stone-600">You haven't placed any orders yet.
+Start exploring our collection.</p>
+                  
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -146,18 +148,20 @@ const Profile = () => {
 
                       {/* Items List */}
                       <div className="space-y-3 pt-2">
-                        {order.orderItems.map((item) => (
+                        {order.orderItems?.map((item) => (
                           <div key={item._id} className="flex items-center gap-4 text-xs">
                             <div className="w-12 h-14 bg-stone-100 rounded-xs overflow-hidden shrink-0 border border-stone-200/50">
                               <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-grow min-w-0">
                               <h4 className="font-medium text-stone-800 truncate">{item.name}</h4>
-                              <p className="text-[9px] text-[#b38f44] tracking-wider uppercase font-semibold">Qty: {item.qty} × ${item.price}</p>
+                             <p className="text-[9px] text-[#b38f44] tracking-wider uppercase font-semibold">
+  Qty: {item.qty} × ₹{item.price.toLocaleString("en-IN")}
+</p>
                             </div>
                             <div className="text-right text-stone-700 font-semibold font-mono">
-                              ${(item.qty * item.price).toFixed(2)}
-                            </div>
+  ₹{(item.qty * item.price).toLocaleString("en-IN")}
+</div>
                           </div>
                         ))}
                       </div>
@@ -202,7 +206,9 @@ const Profile = () => {
                       {/* Pricing Footer */}
                       <div className="border-t border-stone-100 pt-3 flex justify-between items-center text-xs">
                         <span className="text-stone-400 uppercase tracking-widest font-medium text-[10px]">Grand Total</span>
-                        <span className="text-base font-semibold text-[#78532f] font-mono">${order.totalPrice.toFixed(2)}</span>
+                        <span className="text-base font-semibold text-[#78532f] font-mono">
+ ₹{Number(order.totalPrice).toLocaleString("en-IN")}
+</span>
                       </div>
                     </motion.div>
                   ))}

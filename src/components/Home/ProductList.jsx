@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingBag, Eye, Star } from 'lucide-react';
 import { api } from '../../utils/api';
-
+import { useNavigate } from "react-router-dom";
 
 
 const ProductList = ({ onAddToCart }) => {
@@ -14,14 +14,8 @@ const ProductList = ({ onAddToCart }) => {
     const fetchLiveProducts = async () => {
       try {
         setLoading(true);
-        const data = await api.get('/products?pageSize=8');
-        
-       const normalized = (data.products || []).map((p) => ({
-  ...p,
-  id: p._id,
-}));
-
-setProducts(normalized);
+        const data = await api.get("/products?pageSize=8");
+setProducts(data.products || []);
       } catch (err) {
       console.error(err);  
       } finally {
@@ -33,9 +27,21 @@ setProducts(normalized);
   }, []);
   
 
-  const handleExploreMore = () => {
-    window.location.href = '/products';
-  };
+
+const cleanPrice = (price) => {
+  if (typeof price === "number") return price;
+  if (!price) return 0;
+
+  return (
+    parseFloat(String(price).replace(/[^0-9.-]+/g, "")) || 0
+  );
+};
+
+const navigate = useNavigate();
+
+const handleExploreMore = () => {
+    navigate("/products");
+};
 
   return (
     <div className="bg-[#78532f] py-20 px-6 font-sans antialiased">
@@ -71,14 +77,89 @@ setProducts(normalized);
   <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-16">
     {products.map((product, index) => (
       <motion.div
-        key={product.id || index}
+        key={product._id}
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: index * 0.05 }}
         className="bg-[#26201c] rounded-sm overflow-hidden shadow-2xl border border-white/5 flex flex-col justify-between group"
       >
-        {/* Keep your existing product card code here exactly as it is */}
+       {/* Product Image */}
+<div className="relative h-72 overflow-hidden bg-stone-100">
+  <img
+  src={product.image}
+  alt={product.name}
+  onError={(e) => {
+    e.target.src = "/placeholder.png";
+  }}
+  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+/>
+
+  {product.size && (
+    <span className="absolute bottom-3 left-3 bg-white/90 text-[10px] px-2 py-1 rounded">
+      {product.size}
+    </span>
+  )}
+
+  <button
+  onClick={() => navigate(`/products/${product._id}`)}
+  className="absolute top-3 right-3 p-2 rounded-full bg-white/90 opacity-0 group-hover:opacity-100 transition"
+>
+  <Eye className="w-4 h-4 text-stone-700" />
+</button>
+</div>
+
+{/* Product Details */}
+<div className="p-5 text-center flex flex-col justify-between flex-grow">
+
+  <div>
+    <p className="text-[#d4af37] text-[10px] uppercase tracking-[0.2em] font-semibold mb-1">
+      {product.category}
+    </p>
+
+    <h3 className="text-white text-lg font-medium mb-3">
+      {product.name}
+    </h3>
+
+    <div className="flex justify-center gap-1 mb-4">
+      {[...Array(5)].map((_, i) => (
+        <Star
+          key={i}
+          className={`w-3 h-3 ${
+            i < Math.floor(product.rating || 0)
+              ? "fill-[#d4af37] text-[#d4af37]"
+              : "text-stone-500"
+          }`}
+        />
+      ))}
+
+      <span className="text-xs text-stone-400 ml-2">
+        ({product.rating || 0})
+      </span>
+    </div>
+  </div>
+
+  <div>
+    <p className="text-[#d4af37] text-xl font-light mb-5">
+      ₹{cleanPrice(product.price).toLocaleString("en-IN")}
+    </p>
+
+   <button
+  disabled={product.countInStock === 0}
+  onClick={() => onAddToCart(product)}
+  className={`w-full py-3 text-xs font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-2 transition
+    ${
+      product.countInStock > 0
+        ? "border border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-white"
+        : "bg-stone-700 text-stone-400 cursor-not-allowed"
+    }`}
+>
+  <ShoppingBag className="w-4 h-4" />
+  {product.countInStock > 0 ? "ADD TO CART" : "OUT OF STOCK"}
+</button>
+  </div>
+
+</div>
       </motion.div>
     ))}
   </div>
