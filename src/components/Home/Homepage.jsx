@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
-function HomePage({ onAddToCart }) {
+function HomePage() {
   
   const heroRef = useRef(null);
   const textRef = useRef(null);

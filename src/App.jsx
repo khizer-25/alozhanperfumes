@@ -11,7 +11,7 @@ import Login from "./components/Auth/Login";
 import Profile from "./components/Auth/Profile";
 import AdminDashboard from "./components/Admin/AdminDashboard";
 import ContactUs from "./components/Home/Contactus";
-import Checkout from "./components/Home/Checkout";
+import Checkout from "./components/checkout.jsx/Checkout";
 import { api } from "./utils/api";
 import FloatingContactButtons from "./components/FloatingContactButtons";
 import FloatingControls from "./components/FloatingControls";

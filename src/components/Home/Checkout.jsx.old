@@ -151,7 +151,7 @@ const Checkout = ({ cartItems, clearCart, onUpdateQuantity, onRemoveItem, user }
         qty: item.quantity,
         image: item.image,
         price: parsePrice(item.price), // backend expects base price
-        product: item._id || item.id || '603f7e000000000000000001'
+        product: item._id
       }));
 
       // Submit order creation to backend
@@ -195,7 +195,11 @@ const Checkout = ({ cartItems, clearCart, onUpdateQuantity, onRemoveItem, user }
       await new Promise(r => setTimeout(r, 600));
       setStep(4);
     } catch (err) {
-      setPaymentError(err.message || 'Checkout failed. Verify server connection.');
+      setPaymentError(
+  err.response?.data?.message ||
+  err.message ||
+  "Checkout failed"
+);
     } finally {
       setPaymentLoading(false);
       setPaymentPhase('');

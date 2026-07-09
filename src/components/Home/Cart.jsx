@@ -66,7 +66,7 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
         qty: item.quantity,
         image: item.image,
         price: parsePrice(item.price),
-        product: item._id || '603f7e000000000000000001' // Use _id, fallback to mock objectID for security
+        product: item._id // Use _id, fallback to mock objectID for security
       }));
 
       // 2. Submit order creation
