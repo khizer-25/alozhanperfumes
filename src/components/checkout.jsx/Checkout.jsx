@@ -4,15 +4,15 @@ import { AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../utils/api';
 
-import useCheckoutSettings from './checkout/useCheckoutSettings';
-import { parsePrice, formatINR } from './checkout/pricingUtils';
-import CheckoutHeader from './checkout/CheckoutHeader';
-import StepProgress from './checkout/StepProgress';
-import AddressStep from './checkout/AddressStep';
-import PaymentStep from './checkout/PaymentStep';
-import PriceDetailsModal from './checkout/PriceDetailsModal';
-import PaymentLoadingModal from './checkout/PaymentLoadingModal';
-import OrderSuccessStep from './checkout/OrderSuccessStep';
+import useCheckoutSettings from "./useCheckoutSettings";
+import { parsePrice, formatINR } from "./pricingUtils";
+import CheckoutHeader from "./CheckoutHeader";
+import StepProgress from "./StepProgress";
+import AddressStep from "./AddressStep";
+import PaymentStep from "./PaymentStep";
+import OrderSuccessStep from "./OrderSuccessStep";
+import PaymentLoadingModal from "./PaymentLoadingModal";
+import PriceDetailsModal from "./PriceDetailsModal";
 
 const Checkout = ({ cartItems, clearCart, onUpdateQuantity, onRemoveItem, user }) => {
   const navigate = useNavigate();
