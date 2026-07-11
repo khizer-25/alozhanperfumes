@@ -12,8 +12,8 @@ const AnalyticsTab = ({ analytics, orders }) => {
       className="space-y-6"
     >
       <div>
-        <h1 className="text-2xl font-light text-[#261c16] tracking-tight">Business Overview</h1>
-        <p className="text-xs text-stone-500 font-light mt-1">Calculated in real-time from active catalogs, checkout transactions, and ledger logs.</p>
+        <h1 className="text-2xl font-light text-[#261c16] tracking-tight">Business Analytics</h1>
+        <p className="text-xs text-stone-500 font-light mt-1">Monitor revenue, customer growth, product sales, and store performance in real time.</p>
       </div>
 
       {/* Stats Card Grid */}
@@ -21,7 +21,7 @@ const AnalyticsTab = ({ analytics, orders }) => {
         <div className="bg-white border border-stone-200/80 p-5 rounded-sm flex items-center justify-between shadow-xs">
           <div>
             <span className="text-[9px] uppercase tracking-widest text-stone-400 font-bold block mb-1">Total Revenue</span>
-            <h3 className="text-xl font-light font-mono text-[#78532f]">${analytics.totalRevenue.toFixed(2)}</h3>
+            <h3 className="text-xl font-light font-mono text-[#78532f]">₹{Number(analytics.totalRevenue || 0).toLocaleString("en-IN")}</h3>
           </div>
           <div className="p-2.5 bg-[#78532f]/10 text-[#78532f] rounded-full">
             <DollarSign className="w-4 h-4" />
@@ -51,7 +51,7 @@ const AnalyticsTab = ({ analytics, orders }) => {
         <div className="bg-white border border-stone-200/80 p-5 rounded-sm flex items-center justify-between shadow-xs">
           <div>
             <span className="text-[9px] uppercase tracking-widest text-stone-400 font-bold block mb-1">Avg Order Value</span>
-            <h3 className="text-xl font-light font-mono text-[#78532f]">${analytics.averageOrderValue.toFixed(2)}</h3>
+            <h3 className="text-xl font-light font-mono text-[#78532f]">₹{Number(analytics.averageOrderValue || 0).toLocaleString("en-IN")}</h3>
           </div>
           <div className="p-2.5 bg-[#78532f]/10 text-[#78532f] rounded-full">
             <TrendingUp className="w-4 h-4" />
@@ -62,7 +62,7 @@ const AnalyticsTab = ({ analytics, orders }) => {
       {/* Recent Orders table */}
       <div className="bg-white border border-stone-200 rounded-sm p-6 shadow-xs">
         <h3 className="text-[10px] uppercase tracking-widest text-stone-700 font-bold mb-4 border-b border-stone-100 pb-2">
-          Recent Store Checkouts
+          Latest Orders
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left border-collapse">
@@ -76,24 +76,53 @@ const AnalyticsTab = ({ analytics, orders }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 text-stone-600 font-medium">
-              {orders.slice(0, 5).map((order) => (
-                <tr key={order._id} className="hover:bg-stone-50/50">
-                  <td className="py-2.5 px-2 font-mono text-[9px] text-stone-500">{order._id}</td>
-                  <td className="py-2.5 px-2">{order.user?.name || 'Guest'}</td>
-                  <td className="py-2.5 px-2 text-stone-400">{new Date(order.createdAt).toLocaleDateString()}</td>
-                  <td className="py-2.5 px-2">
-                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-xs uppercase tracking-wider ${
-                      order.isPaid ? 'bg-green-50 text-green-800' : 'bg-amber-50 text-amber-800'
-                    }`}>
-                      {order.isPaid ? 'Paid' : 'Unpaid'}
-                    </span>
-                  </td>
-                  <td className="py-2.5 px-2 text-right font-semibold font-mono text-[#78532f]">
-                    ${order.totalPrice.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+  {orders.length > 0 ? (
+    orders.slice(0, 5).map((order) => (
+      <tr key={order._id} className="hover:bg-stone-50/50">
+        <td className="py-2.5 px-2 font-mono text-[9px] text-stone-500">
+          #{order._id.slice(-6).toUpperCase()}
+        </td>
+
+        <td className="py-2.5 px-2">
+          {order.user?.name || "Guest"}
+        </td>
+
+        <td className="py-2.5 px-2 text-stone-400">
+          {new Date(order.createdAt).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+        </td>
+
+        <td className="py-2.5 px-2">
+          <span
+            className={`text-[8px] font-bold px-1.5 py-0.5 rounded-xs uppercase tracking-wider ${
+              order.isPaid
+                ? "bg-green-50 text-green-800"
+                : "bg-amber-50 text-amber-800"
+            }`}
+          >
+            {order.isPaid ? "Paid" : "Unpaid"}
+          </span>
+        </td>
+
+        <td className="py-2.5 px-2 text-right font-semibold font-mono text-[#78532f]">
+          ₹{Number(order.totalPrice || 0).toLocaleString("en-IN")}
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td
+        colSpan="5"
+        className="text-center py-8 text-stone-400"
+      >
+        No recent orders available.
+      </td>
+    </tr>
+  )}
+</tbody>
           </table>
         </div>
       </div>

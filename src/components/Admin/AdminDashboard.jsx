@@ -51,6 +51,7 @@ const AdminDashboard = () => {
   const [selectedReviewForReply, setSelectedReviewForReply] = useState(null);
   const [reviewReplyText, setReviewReplyText] = useState('');
   const [reviewActionSuccess, setReviewActionSuccess] = useState(false);
+  const [reviewSearchQuery, setReviewSearchQuery] = useState("");
 
   // 4. Returns & Refunds States
   const [returnsList, setReturnsList] = useState([]);
@@ -223,7 +224,13 @@ const AdminDashboard = () => {
       } catch (sErr) {
         console.warn('Staff endpoint fallback:', sErr);
       }
-
+          // Analytics
+try {
+  const analyticsData = await api.get("/admin/analytics");
+  setAnalytics(analyticsData);
+} catch (err) {
+  console.warn("Analytics endpoint failed:", err);
+}
       // 10. Fetch Configuration Settings
       try {
         const settings = await api.get('/admin/settings');
@@ -240,25 +247,6 @@ const AdminDashboard = () => {
       } catch (setErr) {
         console.warn('Settings endpoint fallback:', setErr);
       }
-
-      // Compute general live business analytics
-      const totalOrdersCount = loadedOrders.length;
-      const totalProductsCount = loadedProducts.length;
-      const paidOrders = loadedOrders.filter(o => o.isPaid);
-      const totalRev = paidOrders.reduce((sum, o) => sum + o.totalPrice, 0);
-      const totalSalesCount = paidOrders.reduce(
-        (qtySum, o) => qtySum + o.orderItems.reduce((acc, item) => acc + item.qty, 0),
-        0
-      );
-      const aov = paidOrders.length > 0 ? totalRev / paidOrders.length : 0;
-
-      setAnalytics({
-        totalRevenue: totalRev,
-        totalSales: totalSalesCount,
-        totalOrders: totalOrdersCount,
-        totalProducts: totalProductsCount,
-        averageOrderValue: aov
-      });
 
     } catch (err) {
       setError(err.message || 'Failed to synchronize administrative dashboard records.');
@@ -556,6 +544,8 @@ const AdminDashboard = () => {
       setReviewActionSuccess(false);
       await api.put(`/admin/reviews/${reviewId}/status`, { productId, status });
       setReviewActionSuccess(true);
+      setSelectedReviewForReply(null);
+setReviewReplyText("");
       syncData();
       setTimeout(() => setReviewActionSuccess(false), 2000);
     } catch (err) {
@@ -669,6 +659,15 @@ const AdminDashboard = () => {
     c.name.toLowerCase().includes(customerSearchQuery.toLowerCase()) ||
     c.email.toLowerCase().includes(customerSearchQuery.toLowerCase())
   );
+  const filteredReviews = reviewsList.filter((review) => {
+  const search = reviewSearchQuery.toLowerCase();
+
+  return (
+    review.name?.toLowerCase().includes(search) ||
+    review.productName?.toLowerCase().includes(search) ||
+    review.comment?.toLowerCase().includes(search)
+  );
+});
 
   // Review Analytics
   const averageReviewRating = reviewsList.length > 0
@@ -755,12 +754,19 @@ const AdminDashboard = () => {
 
           {activeTab === 'reviews' && (
             <ReviewsTab
-              products={products} reviewsList={reviewsList} averageReviewRating={averageReviewRating}
-              reviewActionSuccess={reviewActionSuccess}
-              selectedReviewForReply={selectedReviewForReply} setSelectedReviewForReply={setSelectedReviewForReply}
-              reviewReplyText={reviewReplyText} setReviewReplyText={setReviewReplyText}
-              handleReviewStatusUpdate={handleReviewStatusUpdate} handleReviewReplySubmit={handleReviewReplySubmit}
-            />
+    products={products}
+    reviewsList={filteredReviews}
+    reviewSearchQuery={reviewSearchQuery}
+    setReviewSearchQuery={setReviewSearchQuery}
+    averageReviewRating={averageReviewRating}
+    reviewActionSuccess={reviewActionSuccess}
+    selectedReviewForReply={selectedReviewForReply}
+    setSelectedReviewForReply={setSelectedReviewForReply}
+    reviewReplyText={reviewReplyText}
+    setReviewReplyText={setReviewReplyText}
+    handleReviewStatusUpdate={handleReviewStatusUpdate}
+    handleReviewReplySubmit={handleReviewReplySubmit}
+/>
           )}
 
           {activeTab === 'returns' && (
@@ -782,6 +788,7 @@ const AdminDashboard = () => {
               orderPaymentFilter={orderPaymentFilter} setOrderPaymentFilter={setOrderPaymentFilter}
               orderDeliveryFilter={orderDeliveryFilter} setOrderDeliveryFilter={setOrderDeliveryFilter}
               expandedOrderId={expandedOrderId} setExpandedOrderId={setExpandedOrderId}
+              handleMarkAsPaid={handleMarkAsPaid}
               handleMarkAsPaid={handleMarkAsPaid} handleMarkAsDelivered={handleMarkAsDelivered}
             />
           )}

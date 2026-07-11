@@ -3,10 +3,18 @@ import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
 
 const ReviewsTab = ({
-  products, reviewsList, averageReviewRating, reviewActionSuccess,
-  selectedReviewForReply, setSelectedReviewForReply,
-  reviewReplyText, setReviewReplyText,
-  handleReviewStatusUpdate, handleReviewReplySubmit
+  products,
+  reviewsList,
+  reviewSearchQuery,
+  setReviewSearchQuery,
+  averageReviewRating,
+  reviewActionSuccess,
+  selectedReviewForReply,
+  setSelectedReviewForReply,
+  reviewReplyText,
+  setReviewReplyText,
+  handleReviewStatusUpdate,
+  handleReviewReplySubmit
 }) => {
   return (
     <motion.div
@@ -16,17 +24,38 @@ const ReviewsTab = ({
       exit={{ opacity: 0, y: 10 }}
       className="space-y-6"
     >
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-xl font-light text-[#261c16] tracking-tight">Review Management</h1>
-          <p className="text-xs text-stone-500 font-light mt-1">Moderate customer reviews, configure visibility states, and post official developer replies.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+    <div>
+        <h1 className="text-xl font-light text-[#261c16] tracking-tight">
+            Review Management
+        </h1>
+
+        <p className="text-xs text-stone-500 font-light mt-1">
+            Monitor customer reviews and reply to customer feedback.
+        </p>
+    </div>
+
+    <div className="flex gap-3 items-center">
+
+        <div className="relative w-64">
+            <input
+    type="text"
+    placeholder="Search by customer, perfume or comment..."
+    value={reviewSearchQuery}
+    onChange={(e) => setReviewSearchQuery(e.target.value)}
+    className="w-full bg-white border border-stone-200 rounded-sm py-1.5 px-3 text-xs focus:outline-none"
+/>
         </div>
 
-        <div className="bg-white border border-stone-200/80 px-4 py-2 rounded-sm text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
-          <Star className="w-4 h-4 fill-[#d4af37] text-[#d4af37]" />
-          Average Rating: {averageReviewRating.toFixed(1)} / 5.0
+        <div className="bg-white border border-stone-200 px-4 py-2 rounded-sm text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
+            <Star className="w-4 h-4 fill-[#d4af37] text-[#d4af37]" />
+            {averageReviewRating.toFixed(1)} / 5
         </div>
-      </div>
+
+    </div>
+
+</div>
 
       {/* Review metrics: top and low rated perfumes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -74,14 +103,60 @@ const ReviewsTab = ({
             <div key={rev._id} className="pt-4 first:pt-0 flex flex-col md:flex-row gap-4 justify-between items-start text-xs font-medium">
 
               <div className="space-y-1.5 max-w-xl">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-stone-850">{rev.name}</span>
-                  <span className="text-[9px] font-bold font-mono text-[#d4af37] bg-stone-100 px-1 py-0.2 rounded-xs">{rev.rating} ★</span>
-                  <span className="text-stone-400 font-light text-[9px]">- on {rev.productName}</span>
-                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-xs uppercase tracking-wider border ${
-                    rev.status === 'approved' ? 'border-green-200 text-green-700 bg-green-50/50' : rev.status === 'rejected' ? 'border-red-200 text-red-700 bg-red-50/50' : 'border-stone-200 text-stone-600 bg-stone-50'
-                  }`}>{rev.status}</span>
-                </div>
+                <div className="space-y-1">
+
+  <div className="flex items-center justify-between">
+
+    <div>
+
+      <h4 className="font-semibold text-stone-800">
+        {rev.name}
+      </h4>
+
+      <p className="text-[10px] text-stone-500">
+        {rev.productName}
+      </p>
+
+    </div>
+
+    <span className={`text-[8px] font-bold px-2 py-1 rounded-xs uppercase tracking-wider border ${
+      rev.status === "approved"
+        ? "border-green-200 text-green-700 bg-green-50"
+        : rev.status === "rejected"
+        ? "border-red-200 text-red-700 bg-red-50"
+        : "border-stone-200 text-stone-600 bg-stone-50"
+    }`}>
+      {rev.status}
+    </span>
+
+  </div>
+
+  <div className="flex items-center gap-3 text-[10px] text-stone-500">
+
+   <div className="flex">
+  {Array.from({ length: 5 }).map((_, index) => (
+    <Star
+      key={index}
+      className={`w-3 h-3 ${
+        index < rev.rating
+          ? "fill-[#d4af37] text-[#d4af37]"
+          : "text-stone-300"
+      }`}
+    />
+  ))}
+</div>
+
+    <span>
+      {new Date(rev.createdAt).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })}
+    </span>
+
+  </div>
+
+</div>
 
                 <p className="text-stone-600 font-light leading-relaxed">{rev.comment}</p>
 
@@ -116,7 +191,7 @@ const ReviewsTab = ({
                   Hide
                 </button>
                 <button onClick={() => setSelectedReviewForReply(rev)} className="text-[8px] font-bold uppercase tracking-wider border border-[#d4af37] text-black px-2 py-1 rounded-xs bg-[#d4af37]/15 hover:bg-[#d4af37]/35">
-                  Reply
+                  {rev.reply ? "Edit Reply" : "Reply"}
                 </button>
               </div>
 

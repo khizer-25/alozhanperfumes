@@ -5,8 +5,6 @@ import { Search, User } from 'lucide-react';
 const CustomersTab = ({
   filteredCustomers, customerSearchQuery, setCustomerSearchQuery,
   selectedCustomerProfile, setSelectedCustomerProfile,
-  handleBlockCustomer,
-  passResetValue, setPassResetValue, setPassResetTargetId, passResetSuccess, handleResetPasswordSubmit,
   couponCode, setCouponCode, setCouponTargetId, couponSuccess, handleIssueCouponSubmit
 }) => {
   return (
@@ -20,7 +18,7 @@ const CustomersTab = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-light text-[#261c16] tracking-tight">Customer Management</h1>
-          <p className="text-xs text-stone-500 font-light mt-1">Review purchase histories, lifetime values, restrict customer access, and issue coupons.</p>
+          <p className="text-xs text-stone-500 font-light mt-1">Review customer profiles, purchase history, lifetime value, and issue coupon codes.</p>
         </div>
 
         <div className="relative w-full max-w-xs shrink-0">
@@ -58,22 +56,14 @@ const CustomersTab = ({
                       <span className="truncate">{c.name}</span>
                     </td>
                     <td className="py-2.5 px-2 text-stone-500 truncate max-w-[120px]">{c.email}</td>
-                    <td className="py-2.5 px-2">
-                      {c.isBlocked ? (
-                        <span className="bg-red-50 text-red-800 text-[8px] font-bold px-1.5 py-0.5 rounded-xs uppercase tracking-wider">Blocked</span>
-                      ) : (
-                        <span className="bg-green-50 text-green-800 text-[8px] font-bold px-1.5 py-0.5 rounded-xs uppercase tracking-wider">Active</span>
-                      )}
-                    </td>
                     <td className="py-2.5 px-2 text-right space-x-1 whitespace-nowrap">
-                      <button onClick={() => setSelectedCustomerProfile(c)} className="text-[9px] font-bold uppercase tracking-wider border border-stone-200 py-1 px-2 rounded-xs hover:border-stone-400 bg-white">
-                        Analytics
-                      </button>
-                      <button onClick={() => handleBlockCustomer(c._id, c.isBlocked)} className={`text-[9px] font-bold uppercase tracking-wider border py-1 px-2 rounded-xs ${
-                        c.isBlocked ? 'border-green-200 text-green-700 bg-green-50 hover:bg-green-100' : 'border-red-200 text-red-700 bg-red-50 hover:bg-red-100'
-                      }`}>
-                        {c.isBlocked ? 'Unblock' : 'Block'}
-                      </button>
+                    
+                      <button
+  onClick={() => setSelectedCustomerProfile(c)}
+  className="text-[9px] font-bold uppercase tracking-wider border border-stone-200 py-1 px-2 rounded-xs hover:border-stone-400 bg-white"
+>
+  View Profile
+</button>
                     </td>
                   </tr>
                 ))}
@@ -84,7 +74,7 @@ const CustomersTab = ({
 
         {/* Customer Details & Actions panel */}
         <div className="lg:col-span-1 bg-white border border-stone-200 rounded-sm p-5 shadow-xs space-y-5">
-          <h3 className="text-[10px] uppercase tracking-widest text-stone-700 font-bold border-b border-stone-100 pb-2">Details & Controls</h3>
+          <h3 className="text-[10px] uppercase tracking-widest text-stone-700 font-bold border-b border-stone-100 pb-2">Customer Details</h3>
 
           {selectedCustomerProfile ? (
             <div className="space-y-4 text-xs">
@@ -95,32 +85,56 @@ const CustomersTab = ({
                 </h4>
                 <div className="space-y-1.5 font-light text-stone-600">
                   <p><strong className="font-medium text-stone-800">Phone:</strong> {selectedCustomerProfile.phone || 'N/A'}</p>
+                  <p>
+<strong className="font-medium text-stone-800">
+Email:
+</strong>{" "}
+{selectedCustomerProfile.email}
+</p>
                   <p><strong className="font-medium text-stone-800">Address:</strong> {selectedCustomerProfile.address || 'N/A'}</p>
-                  <p><strong className="font-medium text-stone-800">Spend:</strong> ${selectedCustomerProfile.totalSpend?.toFixed(2) || '0.00'}</p>
-                  <p><strong className="font-medium text-stone-800">LTV:</strong> ${selectedCustomerProfile.lifetimeValue?.toFixed(2) || '0.00'}</p>
-                  <p><strong className="font-medium text-stone-800">Frequency:</strong> {selectedCustomerProfile.purchaseFrequency || 0} ord/mo</p>
+                  <p><strong className="font-medium text-stone-800">Spend:</strong>₹{Number(
+selectedCustomerProfile.totalSpend || 0
+).toLocaleString("en-IN")}</p>
+                  <p>
+  <strong className="font-medium text-stone-800">
+    Orders:
+  </strong>{" "}
+  {selectedCustomerProfile.totalOrders || 0}
+</p>
+<p>
+  <strong className="font-medium text-stone-800">
+    Joined:
+  </strong>{" "}
+ {new Date(selectedCustomerProfile.createdAt).toLocaleString()}
+</p>
+<p>
+  <strong className="font-medium text-stone-800">
+    Coupons:
+  </strong>
+</p>
+
+<div className="flex flex-wrap gap-2 mt-1">
+  {selectedCustomerProfile.coupons?.length ? (
+    selectedCustomerProfile.coupons.map(code => (
+      <span
+        key={code}
+        className="bg-[#d4af37]/20 text-[#78532f] border border-[#d4af37]/40 text-[10px] px-2 py-1 rounded-sm font-semibold">
+        {code}
+      </span>
+    ))
+  ) : (
+    <span>No Coupons Issued</span>
+  )}
+</div>
+                  <p><strong className="font-medium text-stone-800">LTV:</strong> ₹{Number(
+selectedCustomerProfile.lifetimeValue || 0
+).toLocaleString("en-IN")}</p>
+                  <p><strong className="font-medium text-stone-800">Frequency:</strong> {selectedCustomerProfile.purchaseFrequency || 0} orders/month</p>
                   <p><strong className="font-medium text-stone-800">Last Purchase:</strong> {selectedCustomerProfile.lastPurchaseDate ? new Date(selectedCustomerProfile.lastPurchaseDate).toLocaleDateString() : 'Never'}</p>
                 </div>
               </div>
 
-              {/* Reset Password form */}
-              <div className="space-y-1.5 border-t border-stone-100 pt-3">
-                <h5 className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Reset Password</h5>
-                {passResetSuccess && <p className="text-green-700 text-[10px]">Password reset successful!</p>}
-                <form onSubmit={handleResetPasswordSubmit} className="flex gap-2">
-                  <input
-                    type="password" placeholder="New password..."
-                    value={passResetValue} onChange={(e) => {
-                      setPassResetValue(e.target.value);
-                      setPassResetTargetId(selectedCustomerProfile._id);
-                    }}
-                    className="bg-stone-50 border border-stone-200 rounded-sm py-1 px-2 text-xs flex-grow focus:outline-none focus:border-[#d4af37]"
-                  />
-                  <button type="submit" className="bg-[#26201c] hover:bg-black text-[#d4af37] text-[10px] font-bold px-3 py-1 rounded-sm uppercase">
-                    Reset
-                  </button>
-                </form>
-              </div>
+            
 
               {/* Issue Coupon form */}
               <div className="space-y-1.5 border-t border-stone-100 pt-3">
@@ -130,9 +144,9 @@ const CustomersTab = ({
                   <input
                     type="text" placeholder="e.g. OUD15..."
                     value={couponCode} onChange={(e) => {
-                      setCouponCode(e.target.value);
-                      setCouponTargetId(selectedCustomerProfile._id);
-                    }}
+  setCouponCode(e.target.value.toUpperCase());
+  setCouponTargetId(selectedCustomerProfile._id);
+}}
                     className="bg-stone-50 border border-stone-200 rounded-sm py-1 px-2 text-xs flex-grow focus:outline-none focus:border-[#d4af37] uppercase"
                   />
                   <button type="submit" className="bg-[#26201c] hover:bg-black text-[#d4af37] text-[10px] font-bold px-3 py-1 rounded-sm uppercase">
@@ -144,7 +158,7 @@ const CustomersTab = ({
             </div>
           ) : (
             <div className="text-center py-10 text-stone-400 font-light text-xs">
-              Select a customer profile to edit password, award coupons, or review lifetime analytics details.
+              Select a customer to view profile details and issue coupon codes.
             </div>
           )}
         </div>
