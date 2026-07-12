@@ -202,7 +202,7 @@ const EditProductModal = ({
                     <input type="text" placeholder="URL path..." value={editProductImage} readOnly className="w-full bg-stone-50 border border-stone-200 rounded-sm py-2 px-3 text-stone-500 font-mono text-[10px]" />
                     {editProductImage && (
                       <div className="w-14 h-14 border border-stone-200 rounded-xs overflow-hidden">
-                        <img src={editProductImage.startsWith('http') ? editProductImage : `https://ozhan-backend.onrender.com${editProductImage}`} className="w-full h-full object-cover" />
+                        <img src={editProductImage.startsWith('http') ? editProductImage : `https://ozhan-backend.onrender.com${editProductImage}`} alt={editProductName} className="w-full h-full object-cover" />
                       </div>
                     )}
                   </div>

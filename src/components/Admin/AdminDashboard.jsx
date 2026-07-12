@@ -468,21 +468,29 @@ try {
     }
 
     setInventorySuccess(false);
-    try {
-      await api.put('/admin/inventory/adjust', {
-        productId: selectedInventoryProduct,
-        action: inventoryAction,
-        quantity: Number(inventoryQuantity)
-      });
-      setInventorySuccess(true);
-      setInventoryQuantity('5');
-      syncData();
-      setTimeout(() => setInventorySuccess(false), 3000);
-    } catch (err) {
-      alert(err.message || 'Adjustment failed');
-    }
-  };
 
+try {
+  await api.put('/admin/inventory/adjust', {
+    productId: selectedInventoryProduct,
+    action: inventoryAction,
+    quantity: Number(inventoryQuantity)
+  });
+
+  // Refresh inventory and history before showing success
+  await syncData();
+
+  setInventorySuccess(true);
+
+  // Reset form
+  setSelectedInventoryProduct('');
+  setInventoryAction('Add');
+  setInventoryQuantity('5');
+
+  setTimeout(() => setInventorySuccess(false), 3000);
+} catch (err) {
+  alert(err.message || 'Adjustment failed');
+}
+  };
   // Customer Actions
   const handleBlockCustomer = async (id, isBlocked) => {
     if (!window.confirm(`Are you sure you want to ${isBlocked ? 'unblock' : 'block'} this customer?`)) {
@@ -570,20 +578,33 @@ setReviewReplyText("");
     }
   };
 
-  // Return & Refund Actions
-  const handleReturnAction = async (id, status) => {
-    try {
+ const handleReturnAction = async (returnId, status) => {
+  try {
+    await api.put(`/admin/returns/${returnId}`, {
+      status,
+      refundAmount:
+        status === "Approved" || status === "Refunded"
+          ? Number(returnRefundAmount)
+          : undefined,
+    });
+
+    await syncData();
+
+    setReturnActionSuccess(true);
+    setReturnRefundAmount("");
+
+    setTimeout(() => {
       setReturnActionSuccess(false);
-      let refAmt = returnRefundAmount ? Number(returnRefundAmount) : undefined;
-      await api.put(`/admin/returns/${id}`, { status, refundAmount: refAmt });
-      setReturnRefundAmount('');
-      setReturnActionSuccess(true);
-      syncData();
-      setTimeout(() => setReturnActionSuccess(false), 2000);
-    } catch (err) {
-      alert(err.message || 'Failed to execute returns action');
-    }
-  };
+    }, 3000);
+
+  } catch (err) {
+    alert(
+      err.response?.data?.message ||
+      err.message ||
+      "Failed to update return request"
+    );
+  }
+};
 
   // Staff Management (RBAC Role Editing)
   const handleUpdateStaffRole = async (staffId, newRole) => {
