@@ -75,7 +75,7 @@ const ReturnsTab = ({
 
                 {ret.status === 'Approved' && (
                   <button onClick={() => handleReturnAction(ret._id, 'Refunded')} className="text-[8px] font-bold uppercase tracking-wider bg-green-600 text-white py-1 px-3.5 rounded-xs hover:bg-green-700">
-                    Issue Refund payment
+                    Issue Refund 
                   </button>
                 )}
 
