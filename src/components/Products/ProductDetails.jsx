@@ -77,6 +77,7 @@ function ProductDetails({ onAddToCart }) {
               className="w-full h-[650px] object-cover"
             />
           </div>
+          
 
           {/* Details */}
 
