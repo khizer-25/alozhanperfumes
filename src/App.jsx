@@ -16,6 +16,7 @@ import { api } from "./utils/api";
 import FloatingContactButtons from "./components/FloatingContactButtons";
 import FloatingControls from "./components/FloatingControls";
 import ProductDetails from "./components/Products/ProductDetails";
+import ScrollGallery from "./components/Home/ScrollGallery";
 
 function App() {
   const location = useLocation();
@@ -181,6 +182,7 @@ const existingItem = prevItems.find(
     return (
       <>
         <HomePage />
+        <ScrollGallery/>
         <ProductList onAddToCart={handleAddToCart} />
         <FeaturesSection />
         <ContactUs />
