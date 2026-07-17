@@ -89,7 +89,7 @@ const ReturnsTab = ({
             </div>
           ))}
           {returnsList.length === 0 && (
-            <div className="text-center py-10 text-stone-400 font-light">No return requests.</div>
+            <div className="text-center py-10 text-stone-400 font-light">No return requests</div>
           )}
         </div>
       </div>
