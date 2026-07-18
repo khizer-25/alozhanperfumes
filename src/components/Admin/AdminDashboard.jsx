@@ -27,7 +27,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // 1. Inventory States
+  // Inventory States
   const [inventoryList, setInventoryList] = useState([]);
   const [inventoryHistory, setInventoryHistory] = useState([]);
   const [selectedInventoryProduct, setSelectedInventoryProduct] = useState('');
@@ -35,7 +35,7 @@ const AdminDashboard = () => {
   const [inventoryQuantity, setInventoryQuantity] = useState('5');
   const [inventorySuccess, setInventorySuccess] = useState(false);
 
-  // 2. Customer States
+  // Customer States
   const [customers, setCustomers] = useState([]);
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [selectedCustomerProfile, setSelectedCustomerProfile] = useState(null);
@@ -46,19 +46,19 @@ const AdminDashboard = () => {
   const [passResetValue, setPassResetValue] = useState('');
   const [passResetSuccess, setPassResetSuccess] = useState(false);
 
-  // 3. Review States
+  // Review States
   const [reviewsList, setReviewsList] = useState([]);
   const [selectedReviewForReply, setSelectedReviewForReply] = useState(null);
   const [reviewReplyText, setReviewReplyText] = useState('');
   const [reviewActionSuccess, setReviewActionSuccess] = useState(false);
   const [reviewSearchQuery, setReviewSearchQuery] = useState("");
 
-  // 4. Returns & Refunds States
+  // Returns & Refunds States
   const [returnsList, setReturnsList] = useState([]);
   const [returnActionSuccess, setReturnActionSuccess] = useState(false);
   const [returnRefundAmount, setReturnRefundAmount] = useState('');
 
-  // 5. Payment States
+  // Payment States
   const [paymentMetrics, setPaymentMetrics] = useState({
     Razorpay: { successful: 0, failed: 0, refunds: 0 },
     Stripe: { successful: 0, failed: 0, refunds: 0 },
@@ -66,11 +66,11 @@ const AdminDashboard = () => {
     COD: { successful: 0, failed: 0, refunds: 0 }
   });
 
-  // 6. User & Staff RBAC States
+  // User & Staff RBAC States
   const [staffList, setStaffList] = useState([]);
   const [currentUserRole, setCurrentUserRole] = useState('admin');
 
-  // 7. Store & GST Settings States
+  // Store & GST Settings States
   const [businessName, setBusinessName] = useState('Al Özhan Parfums');
   const [gstNumber, setGstNumber] = useState('27AAAAA0000A1Z5');
   const [businessAddress, setBusinessAddress] = useState('Atelier House, Colaba, Mumbai, India');
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
   const [invoiceTerms, setInvoiceTerms] = useState('Products purchased are subject to return guidelines within 7 business days.');
   const [settingsSuccess, setSettingsSuccess] = useState(false);
 
-  // 8. Add Product Form States (Updated with perfume-specific inputs)
+  // Add Product Form States
   const [newProductName, setNewProductName] = useState('');
   const [newProductBrand, setNewProductBrand] = useState('Al Özhan');
   const [newProductCategory, setNewProductCategory] = useState('Floral');
@@ -141,7 +141,6 @@ const AdminDashboard = () => {
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [statusUpdatingId, setStatusUpdatingId] = useState('');
 
-  // Load user role
   useEffect(() => {
     const userInfo = localStorage.getItem('userInfo');
     if (userInfo) {
@@ -157,81 +156,54 @@ const AdminDashboard = () => {
       setLoading(true);
       setError('');
 
-      // 1. Fetch store products
       const productRes = await api.get('/products?pageSize=100');
-      const loadedProducts = productRes.products || [];
-      setProducts(loadedProducts);
+      setProducts(productRes.products || []);
 
-      // 2. Fetch system orders
       const loadedOrders = await api.get('/orders');
       setOrders(loadedOrders);
 
-      // 3. Fetch customer queries
       try {
         const queryRes = await api.get('/contact');
         setQueries(queryRes || []);
-      } catch (qErr) {
-        console.error('Failed to load customer queries:', qErr);
-      }
+      } catch (qErr) {}
 
-      // 4. Fetch Inventory list and history
       try {
         const inv = await api.get('/admin/inventory');
         setInventoryList(inv || []);
-
         const hist = await api.get('/admin/inventory/history');
         setInventoryHistory(hist || []);
-      } catch (iErr) {
-        console.warn('Inventory endpoints fallback:', iErr);
-      }
+      } catch (iErr) {}
 
-      // 5. Fetch Customers list
       try {
         const custs = await api.get('/admin/customers');
         setCustomers(custs || []);
-      } catch (cErr) {
-        console.warn('Customers fallback:', cErr);
-      }
+      } catch (cErr) {}
 
-      // 6. Fetch Reviews
       try {
         const revs = await api.get('/admin/reviews');
         setReviewsList(revs || []);
-      } catch (rErr) {
-        console.warn('Reviews endpoint fallback:', rErr);
-      }
+      } catch (rErr) {}
 
-      // 7. Fetch Returns
       try {
         const rets = await api.get('/admin/returns');
         setReturnsList(rets || []);
-      } catch (retErr) {
-        console.warn('Returns endpoint fallback:', retErr);
-      }
+      } catch (retErr) {}
 
-      // 8. Fetch Payment Metrics
       try {
         const payMetrics = await api.get('/admin/payments/analytics');
         setPaymentMetrics(payMetrics || paymentMetrics);
-      } catch (pErr) {
-        console.warn('Payments endpoint fallback:', pErr);
-      }
+      } catch (pErr) {}
 
-      // 9. Fetch Staff RBAC accounts
       try {
         const staff = await api.get('/admin/staff');
         setStaffList(staff || []);
-      } catch (sErr) {
-        console.warn('Staff endpoint fallback:', sErr);
-      }
-          // Analytics
-try {
-  const analyticsData = await api.get("/admin/analytics");
-  setAnalytics(analyticsData);
-} catch (err) {
-  console.warn("Analytics endpoint failed:", err);
-}
-      // 10. Fetch Configuration Settings
+      } catch (sErr) {}
+      
+      try {
+        const analyticsData = await api.get("/admin/analytics");
+        setAnalytics(analyticsData);
+      } catch (err) {}
+
       try {
         const settings = await api.get('/admin/settings');
         if (settings) {
@@ -244,9 +216,7 @@ try {
           setInvoiceFooter(settings.footerText || '');
           setInvoiceTerms(settings.terms || '');
         }
-      } catch (setErr) {
-        console.warn('Settings endpoint fallback:', setErr);
-      }
+      } catch (setErr) {}
 
     } catch (err) {
       setError(err.message || 'Failed to synchronize administrative dashboard records.');
@@ -259,38 +229,31 @@ try {
     syncData();
   }, []);
 
-  // Multer file upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const formData = new FormData();
     formData.append('image', file);
-
     setUploading(true);
     setFormError('');
-
     try {
       const res = await api.upload('/upload', formData);
       setNewProductImage(res.image);
     } catch (err) {
-      setFormError(err.message || 'Image upload failed. Ensure server is online.');
+      setFormError(err.message || 'Image upload failed.');
     } finally {
       setUploading(false);
     }
   };
 
-  // Submit product creation (updated with fragrance characteristics)
   const handleAddProduct = async (e) => {
     e.preventDefault();
     setFormError('');
     setFormSuccess(false);
-
     if (!newProductName || !newProductBrand || !newProductPrice || !newProductDescription || !newProductImage) {
-      setFormError('Please fill in all mandatory fields and upload a product image.');
+      setFormError('Please fill in all mandatory fields.');
       return;
     }
-
     try {
       const productData = {
         name: newProductName,
@@ -300,7 +263,6 @@ try {
         countInStock: Number(newProductStock),
         description: newProductDescription,
         image: newProductImage,
-        // Fragrance specific attributes
         topNotes: topNotesText.split(',').map(s => s.trim()).filter(Boolean),
         middleNotes: middleNotesText.split(',').map(s => s.trim()).filter(Boolean),
         baseNotes: baseNotesText.split(',').map(s => s.trim()).filter(Boolean),
@@ -308,31 +270,22 @@ try {
         gender: perfumeGender,
         occasions: perfumeOccasions
       };
-
       await api.post('/products', productData);
-
       setFormSuccess(true);
       setNewProductName('');
       setNewProductPrice('');
       setNewProductStock('10');
       setNewProductDescription('');
       setNewProductImage('');
-
-      // Refresh Lists
       syncData();
-
       setTimeout(() => setFormSuccess(false), 4000);
     } catch (err) {
-      setFormError(err.message || 'Failed to publish new perfume catalog entry.');
+      setFormError(err.message || 'Failed to publish new perfume catalogue entry.');
     }
   };
 
-  // Delete product
   const handleDeleteProduct = async (id) => {
-    if (!window.confirm('Are you absolutely sure you want to remove this perfume from catalogs?')) {
-      return;
-    }
-
+    if (!window.confirm('Are you sure you want to remove this perfume?')) return;
     try {
       await api.delete(`/products/${id}`);
       syncData();
@@ -362,18 +315,15 @@ try {
   const handleEditImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const formData = new FormData();
     formData.append('image', file);
-
     setEditUploading(true);
     setEditFormError('');
-
     try {
       const res = await api.upload('/upload', formData);
       setEditProductImage(res.image);
     } catch (err) {
-      setEditFormError(err.message || 'Image upload failed. Ensure server is online.');
+      setEditFormError(err.message || 'Image upload failed.');
     } finally {
       setEditUploading(false);
     }
@@ -390,12 +340,10 @@ try {
   const handleUpdateProductSubmit = async (e) => {
     e.preventDefault();
     setEditFormError('');
-
     if (!editProductName || !editProductBrand || !editProductPrice || !editProductDescription || !editProductImage) {
-      setEditFormError('Please fill in all mandatory fields and upload a product image.');
+      setEditFormError('Please fill in all mandatory fields.');
       return;
     }
-
     try {
       const updatedData = {
         name: editProductName,
@@ -412,20 +360,16 @@ try {
         gender: editPerfumeGender,
         occasions: editPerfumeOccasions
       };
-
       await api.put(`/products/${editingProduct._id}`, updatedData);
       setEditingProduct(null);
       syncData();
     } catch (err) {
-      setEditFormError(err.message || 'Failed to update perfume catalogue entry.');
+      setEditFormError(err.message || 'Failed to update catalog entry.');
     }
   };
 
   const handleDeleteQuery = async (id) => {
-    if (!window.confirm('Delete this user query from archives?')) {
-      return;
-    }
-
+    if (!window.confirm('Delete this user query?')) return;
     try {
       await api.delete(`/contact/${id}`);
       syncData();
@@ -434,7 +378,6 @@ try {
     }
   };
 
-  // Mark order status
   const handleMarkAsPaid = async (id) => {
     setStatusUpdatingId(id);
     try {
@@ -459,44 +402,32 @@ try {
     }
   };
 
-  // Inventory Adjustment Form Submit
   const handleAdjustInventorySubmit = async (e) => {
     e.preventDefault();
     if (!selectedInventoryProduct || !inventoryQuantity) {
       alert('Please select product and enter quantity');
       return;
     }
-
     setInventorySuccess(false);
-
-try {
-  await api.put('/admin/inventory/adjust', {
-    productId: selectedInventoryProduct,
-    action: inventoryAction,
-    quantity: Number(inventoryQuantity)
-  });
-
-  // Refresh inventory and history before showing success
-  await syncData();
-
-  setInventorySuccess(true);
-
-  // Reset form
-  setSelectedInventoryProduct('');
-  setInventoryAction('Add');
-  setInventoryQuantity('5');
-
-  setTimeout(() => setInventorySuccess(false), 3000);
-} catch (err) {
-  alert(err.message || 'Adjustment failed');
-}
-  };
-  // Customer Actions
-  const handleBlockCustomer = async (id, isBlocked) => {
-    if (!window.confirm(`Are you sure you want to ${isBlocked ? 'unblock' : 'block'} this customer?`)) {
-      return;
+    try {
+      await api.put('/admin/inventory/adjust', {
+        productId: selectedInventoryProduct,
+        action: inventoryAction,
+        quantity: Number(inventoryQuantity)
+      });
+      await syncData();
+      setInventorySuccess(true);
+      setSelectedInventoryProduct('');
+      setInventoryAction('Add');
+      setInventoryQuantity('5');
+      setTimeout(() => setInventorySuccess(false), 3000);
+    } catch (err) {
+      alert(err.message || 'Adjustment failed');
     }
-
+  };
+  
+  const handleBlockCustomer = async (id, isBlocked) => {
+    if (!window.confirm(`Are you sure you want to ${isBlocked ? 'unblock' : 'block'} this customer?`)) return;
     try {
       await api.put(`/admin/customers/${id}/block`, { isBlocked: !isBlocked });
       syncData();
@@ -511,7 +442,6 @@ try {
       alert('Password must be at least 6 characters');
       return;
     }
-
     try {
       await api.put(`/admin/customers/${passResetTargetId}/reset-password`, { newPassword: passResetValue });
       setPassResetSuccess(true);
@@ -531,7 +461,6 @@ try {
       alert('Please enter a coupon code');
       return;
     }
-
     try {
       await api.put(`/admin/customers/${couponTargetId}/coupon`, { couponCode });
       setCouponSuccess(true);
@@ -546,14 +475,13 @@ try {
     }
   };
 
-  // Review Actions
   const handleReviewStatusUpdate = async (reviewId, productId, status) => {
     try {
       setReviewActionSuccess(false);
       await api.put(`/admin/reviews/${reviewId}/status`, { productId, status });
       setReviewActionSuccess(true);
       setSelectedReviewForReply(null);
-setReviewReplyText("");
+      setReviewReplyText("");
       syncData();
       setTimeout(() => setReviewActionSuccess(false), 2000);
     } catch (err) {
@@ -564,7 +492,6 @@ setReviewReplyText("");
   const handleReviewReplySubmit = async (e) => {
     e.preventDefault();
     if (!reviewReplyText) return;
-
     try {
       await api.post(`/admin/reviews/${selectedReviewForReply._id}/reply`, {
         productId: selectedReviewForReply.productId,
@@ -578,35 +505,21 @@ setReviewReplyText("");
     }
   };
 
- const handleReturnAction = async (returnId, status) => {
-  try {
-    await api.put(`/admin/returns/${returnId}`, {
-      status,
-      refundAmount:
-        status === "Approved" || status === "Refunded"
-          ? Number(returnRefundAmount)
-          : undefined,
-    });
+  const handleReturnAction = async (returnId, status) => {
+    try {
+      await api.put(`/admin/returns/${returnId}`, {
+        status,
+        refundAmount: status === "Approved" || status === "Refunded" ? Number(returnRefundAmount) : undefined,
+      });
+      await syncData();
+      setReturnActionSuccess(true);
+      setReturnRefundAmount("");
+      setTimeout(() => setReturnActionSuccess(false), 3000);
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || "Failed to update return request");
+    }
+  };
 
-    await syncData();
-
-    setReturnActionSuccess(true);
-    setReturnRefundAmount("");
-
-    setTimeout(() => {
-      setReturnActionSuccess(false);
-    }, 3000);
-
-  } catch (err) {
-    alert(
-      err.response?.data?.message ||
-      err.message ||
-      "Failed to update return request"
-    );
-  }
-};
-
-  // Staff Management (RBAC Role Editing)
   const handleUpdateStaffRole = async (staffId, newRole) => {
     try {
       await api.put(`/admin/staff/${staffId}/role`, { role: newRole });
@@ -617,11 +530,9 @@ setReviewReplyText("");
     }
   };
 
-  // Save Config GST/Settings
   const handleSaveStoreSettings = async (e) => {
     e.preventDefault();
     setSettingsSuccess(false);
-
     try {
       await api.put('/admin/settings', {
         businessName,
@@ -636,11 +547,10 @@ setReviewReplyText("");
       setSettingsSuccess(true);
       setTimeout(() => setSettingsSuccess(false), 3000);
     } catch (err) {
-      alert(err.message || 'Failed to save store configurations');
+      alert(err.message || 'Failed to save configuration');
     }
   };
 
-  // Occasions checklist toggler
   const handleOccasionToggle = (occ) => {
     if (perfumeOccasions.includes(occ)) {
       setPerfumeOccasions(perfumeOccasions.filter(o => o !== occ));
@@ -649,23 +559,19 @@ setReviewReplyText("");
     }
   };
 
-  // Filter orders
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order._id.toLowerCase().includes(orderSearchQuery.toLowerCase()) ||
       (order.user?.name || '').toLowerCase().includes(orderSearchQuery.toLowerCase()) ||
       order.orderItems.some(item => item.name.toLowerCase().includes(orderSearchQuery.toLowerCase()));
-
     const matchesPayment =
       orderPaymentFilter === 'all' ||
       (orderPaymentFilter === 'paid' && order.isPaid) ||
       (orderPaymentFilter === 'unpaid' && !order.isPaid);
-
     const matchesDelivery =
       orderDeliveryFilter === 'all' ||
       (orderDeliveryFilter === 'delivered' && order.isDelivered) ||
       (orderDeliveryFilter === 'transit' && !order.isDelivered);
-
     return matchesSearch && matchesPayment && matchesDelivery;
   }).sort((a, b) => {
     if (orderSortBy === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
@@ -675,29 +581,27 @@ setReviewReplyText("");
     return 0;
   });
 
-  // Customer Filtering
   const filteredCustomers = customers.filter(c =>
     c.name.toLowerCase().includes(customerSearchQuery.toLowerCase()) ||
     c.email.toLowerCase().includes(customerSearchQuery.toLowerCase())
   );
+  
   const filteredReviews = reviewsList.filter((review) => {
-  const search = reviewSearchQuery.toLowerCase();
+    const search = reviewSearchQuery.toLowerCase();
+    return (
+      review.name?.toLowerCase().includes(search) ||
+      review.productName?.toLowerCase().includes(search) ||
+      review.comment?.toLowerCase().includes(search)
+    );
+  });
 
-  return (
-    review.name?.toLowerCase().includes(search) ||
-    review.productName?.toLowerCase().includes(search) ||
-    review.comment?.toLowerCase().includes(search)
-  );
-});
-
-  // Review Analytics
   const averageReviewRating = reviewsList.length > 0
     ? reviewsList.reduce((acc, r) => acc + r.rating, 0) / reviewsList.length
     : 0;
 
   return (
-    <div className="min-h-screen bg-[#fdfcf9] flex flex-col md:flex-row pt-20 font-sans antialiased text-[#362720]">
-
+    <div className="w-full h-screen overflow-hidden flex bg-[#fdfcf9] font-sans antialiased text-[#362720]">
+      
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -705,141 +609,143 @@ setReviewReplyText("");
         syncData={syncData}
       />
 
-      {/* Main Content Area */}
-      <div className="flex-grow p-6 md:p-10 overflow-y-auto">
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-800 text-xs font-semibold rounded-sm">
-            {error}
-          </div>
-        )}
-
-        <AnimatePresence mode="wait">
-
-          {activeTab === 'analytics' && (
-            <AnalyticsTab analytics={analytics} orders={orders} />
+      <div className="flex-grow h-full flex flex-col overflow-hidden">
+        {/* 
+          FIXED: Changed padding to `pt-28 pb-10 px-6 md:px-10` 
+          This forces the dynamic chart blocks down past the floating glass navbar perfectly.
+        */}
+        <div className="flex-grow pt-28 pb-10 px-6 md:px-10 overflow-y-auto no-scrollbar">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-800 text-xs font-semibold rounded-sm">
+              {error}
+            </div>
           )}
 
-          {activeTab === 'add-product' && (
-            <AddProductTab
-              categories={categories} families={families} genders={genders} occasionList={occasionList}
-              newProductName={newProductName} setNewProductName={setNewProductName}
-              newProductBrand={newProductBrand} setNewProductBrand={setNewProductBrand}
-              newProductCategory={newProductCategory} setNewProductCategory={setNewProductCategory}
-              newProductPrice={newProductPrice} setNewProductPrice={setNewProductPrice}
-              newProductStock={newProductStock} setNewProductStock={setNewProductStock}
-              newProductDescription={newProductDescription} setNewProductDescription={setNewProductDescription}
-              newProductImage={newProductImage}
-              topNotesText={topNotesText} setTopNotesText={setTopNotesText}
-              middleNotesText={middleNotesText} setMiddleNotesText={setMiddleNotesText}
-              baseNotesText={baseNotesText} setBaseNotesText={setBaseNotesText}
-              perfumeFamily={perfumeFamily} setPerfumeFamily={setPerfumeFamily}
-              perfumeGender={perfumeGender} setPerfumeGender={setPerfumeGender}
-              perfumeOccasions={perfumeOccasions} handleOccasionToggle={handleOccasionToggle}
-              uploading={uploading} handleImageUpload={handleImageUpload}
-              formError={formError} formSuccess={formSuccess} handleAddProduct={handleAddProduct}
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {activeTab === 'analytics' && (
+              <AnalyticsTab analytics={analytics} orders={orders} />
+            )}
 
-          {activeTab === 'manage-products' && (
-            <ManageProductsTab
-              products={products} loading={loading}
-              handleEditProductClick={handleEditProductClick}
-              handleDeleteProduct={handleDeleteProduct}
-            />
-          )}
+            {activeTab === 'add-product' && (
+              <AddProductTab
+                categories={categories} families={families} genders={genders} occasionList={occasionList}
+                newProductName={newProductName} setNewProductName={setNewProductName}
+                newProductBrand={newProductBrand} setNewProductBrand={setNewProductBrand}
+                newProductCategory={newProductCategory} setNewProductCategory={setNewProductCategory}
+                newProductPrice={newProductPrice} setNewProductPrice={setNewProductPrice}
+                newProductStock={newProductStock} setNewProductStock={setNewProductStock}
+                newProductDescription={newProductDescription} setNewProductDescription={setNewProductDescription}
+                newProductImage={newProductImage}
+                topNotesText={topNotesText} setTopNotesText={setTopNotesText}
+                middleNotesText={middleNotesText} setMiddleNotesText={setMiddleNotesText}
+                baseNotesText={baseNotesText} setBaseNotesText={setBaseNotesText}
+                perfumeFamily={perfumeFamily} setPerfumeFamily={setPerfumeFamily}
+                perfumeGender={perfumeGender} setPerfumeGender={setPerfumeGender}
+                perfumeOccasions={perfumeOccasions} handleOccasionToggle={handleOccasionToggle}
+                uploading={uploading} handleImageUpload={handleImageUpload}
+                formError={formError} formSuccess={formSuccess} handleAddProduct={handleAddProduct}
+              />
+            )}
 
-          {activeTab === 'inventory' && (
-            <InventoryTab
-              inventoryList={inventoryList} inventoryHistory={inventoryHistory}
-              selectedInventoryProduct={selectedInventoryProduct} setSelectedInventoryProduct={setSelectedInventoryProduct}
-              inventoryAction={inventoryAction} setInventoryAction={setInventoryAction}
-              inventoryQuantity={inventoryQuantity} setInventoryQuantity={setInventoryQuantity}
-              inventorySuccess={inventorySuccess} handleAdjustInventorySubmit={handleAdjustInventorySubmit}
-            />
-          )}
+            {activeTab === 'manage-products' && (
+              <ManageProductsTab
+                products={products} loading={loading}
+                handleEditProductClick={handleEditProductClick}
+                handleDeleteProduct={handleDeleteProduct}
+              />
+            )}
 
-          {activeTab === 'customers' && (
-            <CustomersTab
-              filteredCustomers={filteredCustomers}
-              customerSearchQuery={customerSearchQuery} setCustomerSearchQuery={setCustomerSearchQuery}
-              selectedCustomerProfile={selectedCustomerProfile} setSelectedCustomerProfile={setSelectedCustomerProfile}
-              handleBlockCustomer={handleBlockCustomer}
-              passResetValue={passResetValue} setPassResetValue={setPassResetValue}
-              setPassResetTargetId={setPassResetTargetId} passResetSuccess={passResetSuccess}
-              handleResetPasswordSubmit={handleResetPasswordSubmit}
-              couponCode={couponCode} setCouponCode={setCouponCode}
-              setCouponTargetId={setCouponTargetId} couponSuccess={couponSuccess}
-              handleIssueCouponSubmit={handleIssueCouponSubmit}
-            />
-          )}
+            {activeTab === 'inventory' && (
+              <InventoryTab
+                inventoryList={inventoryList} inventoryHistory={inventoryHistory}
+                selectedInventoryProduct={selectedInventoryProduct} setSelectedInventoryProduct={setSelectedInventoryProduct}
+                inventoryAction={inventoryAction} setInventoryAction={setInventoryAction}
+                inventoryQuantity={inventoryQuantity} setInventoryQuantity={setInventoryQuantity}
+                inventorySuccess={inventorySuccess} handleAdjustInventorySubmit={handleAdjustInventorySubmit}
+              />
+            )}
 
-          {activeTab === 'reviews' && (
-            <ReviewsTab
-    products={products}
-    reviewsList={filteredReviews}
-    reviewSearchQuery={reviewSearchQuery}
-    setReviewSearchQuery={setReviewSearchQuery}
-    averageReviewRating={averageReviewRating}
-    reviewActionSuccess={reviewActionSuccess}
-    selectedReviewForReply={selectedReviewForReply}
-    setSelectedReviewForReply={setSelectedReviewForReply}
-    reviewReplyText={reviewReplyText}
-    setReviewReplyText={setReviewReplyText}
-    handleReviewStatusUpdate={handleReviewStatusUpdate}
-    handleReviewReplySubmit={handleReviewReplySubmit}
-/>
-          )}
+            {activeTab === 'customers' && (
+              <CustomersTab
+                filteredCustomers={filteredCustomers}
+                customerSearchQuery={customerSearchQuery} setCustomerSearchQuery={setCustomerSearchQuery}
+                selectedCustomerProfile={selectedCustomerProfile} setSelectedCustomerProfile={setSelectedCustomerProfile}
+                handleBlockCustomer={handleBlockCustomer}
+                passResetValue={passResetValue} setPassResetValue={setPassResetValue}
+                setPassResetTargetId={setPassResetTargetId} passResetSuccess={passResetSuccess}
+                handleResetPasswordSubmit={handleResetPasswordSubmit}
+                couponCode={couponCode} setCouponCode={setCouponCode}
+                setCouponTargetId={setCouponTargetId} couponSuccess={couponSuccess}
+                handleIssueCouponSubmit={handleIssueCouponSubmit}
+              />
+            )}
 
-          {activeTab === 'returns' && (
-            <ReturnsTab
-              returnsList={returnsList} returnActionSuccess={returnActionSuccess}
-              returnRefundAmount={returnRefundAmount} setReturnRefundAmount={setReturnRefundAmount}
-              handleReturnAction={handleReturnAction}
-            />
-          )}
+            {activeTab === 'reviews' && (
+              <ReviewsTab
+                products={products}
+                reviewsList={filteredReviews}
+                reviewSearchQuery={reviewSearchQuery}
+                setReviewSearchQuery={setReviewSearchQuery}
+                averageReviewRating={averageReviewRating}
+                reviewActionSuccess={reviewActionSuccess}
+                selectedReviewForReply={selectedReviewForReply}
+                setSelectedReviewForReply={setSelectedReviewForReply}
+                reviewReplyText={reviewReplyText}
+                setReviewReplyText={setReviewReplyText}
+                handleReviewStatusUpdate={handleReviewStatusUpdate}
+                handleReviewReplySubmit={handleReviewReplySubmit}
+              />
+            )}
 
-          {activeTab === 'payments' && (
-            <PaymentsTab paymentMetrics={paymentMetrics} orders={orders} />
-          )}
+            {activeTab === 'returns' && (
+              <ReturnsTab
+                returnsList={returnsList} returnActionSuccess={returnActionSuccess}
+                returnRefundAmount={returnRefundAmount} setReturnRefundAmount={setReturnRefundAmount}
+                handleReturnAction={handleReturnAction}
+              />
+            )}
 
-          {activeTab === 'manage-orders' && (
-            <OrdersTab
-              filteredOrders={filteredOrders}
-              orderSearchQuery={orderSearchQuery} setOrderSearchQuery={setOrderSearchQuery}
-              orderPaymentFilter={orderPaymentFilter} setOrderPaymentFilter={setOrderPaymentFilter}
-              orderDeliveryFilter={orderDeliveryFilter} setOrderDeliveryFilter={setOrderDeliveryFilter}
-              expandedOrderId={expandedOrderId} setExpandedOrderId={setExpandedOrderId}
-              handleMarkAsPaid={handleMarkAsPaid}
-              handleMarkAsPaid={handleMarkAsPaid} handleMarkAsDelivered={handleMarkAsDelivered}
-            />
-          )}
+            {activeTab === 'payments' && (
+              <PaymentsTab paymentMetrics={paymentMetrics} orders={orders} />
+            )}
 
-          {activeTab === 'staff' && (
-            <StaffTab
-              staffList={staffList} currentUserRole={currentUserRole}
-              handleUpdateStaffRole={handleUpdateStaffRole}
-            />
-          )}
+            {activeTab === 'manage-orders' && (
+              <OrdersTab
+                filteredOrders={filteredOrders}
+                orderSearchQuery={orderSearchQuery} setOrderSearchQuery={setOrderSearchQuery}
+                orderPaymentFilter={orderPaymentFilter} setOrderPaymentFilter={setOrderPaymentFilter}
+                orderDeliveryFilter={orderDeliveryFilter} setOrderDeliveryFilter={setOrderDeliveryFilter}
+                expandedOrderId={expandedOrderId} setExpandedOrderId={setExpandedOrderId}
+                handleMarkAsPaid={handleMarkAsPaid} handleMarkAsDelivered={handleMarkAsDelivered}
+              />
+            )}
 
-          {activeTab === 'settings-gst' && (
-            <SettingsTab
-              businessName={businessName} setBusinessName={setBusinessName}
-              gstNumber={gstNumber} setGstNumber={setGstNumber}
-              businessAddress={businessAddress} setBusinessAddress={setBusinessAddress}
-              gstPercent={gstPercent} setGstPercent={setGstPercent}
-              stateTax={stateTax} setStateTax={setStateTax}
-              invoiceLogo={invoiceLogo} setInvoiceLogo={setInvoiceLogo}
-              invoiceFooter={invoiceFooter} setInvoiceFooter={setInvoiceFooter}
-              invoiceTerms={invoiceTerms} setInvoiceTerms={setInvoiceTerms}
-              settingsSuccess={settingsSuccess} handleSaveStoreSettings={handleSaveStoreSettings}
-            />
-          )}
+            {activeTab === 'staff' && (
+              <StaffTab
+                staffList={staffList} currentUserRole={currentUserRole}
+                handleUpdateStaffRole={handleUpdateStaffRole}
+              />
+            )}
 
-          {activeTab === 'customer-queries' && (
-            <QueriesTab queries={queries} loading={loading} handleDeleteQuery={handleDeleteQuery} />
-          )}
+            {activeTab === 'settings-gst' && (
+              <SettingsTab
+                businessName={businessName} setBusinessName={setBusinessName}
+                gstNumber={gstNumber} setGstNumber={setGstNumber}
+                businessAddress={businessAddress} setBusinessAddress={setBusinessAddress}
+                gstPercent={gstPercent} setGstPercent={setGstPercent}
+                stateTax={stateTax} setStateTax={setStateTax}
+                invoiceLogo={invoiceLogo} setInvoiceLogo={setInvoiceLogo}
+                invoiceFooter={invoiceFooter} setInvoiceFooter={setInvoiceFooter}
+                invoiceTerms={invoiceTerms} setInvoiceTerms={setInvoiceTerms}
+                settingsSuccess={settingsSuccess} handleSaveStoreSettings={handleSaveStoreSettings}
+              />
+            )}
 
-        </AnimatePresence>
+            {activeTab === 'customer-queries' && (
+              <QueriesTab queries={queries} loading={loading} handleDeleteQuery={handleDeleteQuery} />
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       <EditProductModal
@@ -861,7 +767,6 @@ setReviewReplyText("");
         editUploading={editUploading} handleEditImageUpload={handleEditImageUpload}
         editFormError={editFormError} handleUpdateProductSubmit={handleUpdateProductSubmit}
       />
-
     </div>
   );
 };

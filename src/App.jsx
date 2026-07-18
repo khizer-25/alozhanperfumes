@@ -182,8 +182,8 @@ const existingItem = prevItems.find(
     return (
       <>
         <HomePage />
-        <ScrollGallery/>
         <ProductList onAddToCart={handleAddToCart} />
+        <ScrollGallery/>
         <FeaturesSection />
         <ContactUs />
       </>
