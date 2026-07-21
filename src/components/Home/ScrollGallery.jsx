@@ -194,7 +194,7 @@ export default function ScrollGallery() {
       </div>
 
       {/* Sub-Gallery Continuation Context Section */}
-      <div className="h-screen w-full bg-neutral-50 flex flex-col justify-center items-center text-neutral-800 relative z-10">
+      {/* <div className="h-screen w-full bg-neutral-50 flex flex-col justify-center items-center text-neutral-800 relative z-10">
         <div className="max-w-4xl w-full px-8 flex flex-col md:flex-row justify-between items-start gap-8">
           <div>
             <span className="text-xs font-mono tracking-widest text-neutral-400">SINCE 2008</span>
@@ -204,7 +204,7 @@ export default function ScrollGallery() {
             Creating <span className="font-normal text-neutral-800">timeless environments</span> through architectural precision and material innovation.
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* MODAL POPUP COMPONENT */}
       {activeIdx !== null && (
