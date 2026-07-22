@@ -137,16 +137,16 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                     {checkoutStep === 'success' && 'Purchase Completed'}
                   </h2>
                 </div>
-                <button 
-                  onClick={() => {
-                    onClose();
-                    // Reset steps on close so drawer resets
-                    setTimeout(() => setCheckoutStep('cart'), 300);
-                  }} 
-                  className="text-stone-400 hover:text-white hover:rotate-90 transition-transform duration-200"
-                >
-                  <X size={24} strokeWidth={1.5} />
-                </button>
+               <button 
+  type="button"
+  onClick={() => {
+    onClose();
+    setTimeout(() => setCheckoutStep('cart'), 300);
+  }} 
+  className="text-stone-400 hover:text-white hover:rotate-90 transition-transform duration-200"
+>
+  <X size={24} strokeWidth={1.5} />
+</button>
               </div>
             </div>
 
@@ -193,18 +193,20 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                             <div className="flex items-center justify-between">
                               <div className="flex items-center border border-white/10 rounded-sm bg-black/20">
                                 <button 
-                                  onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                                  className="p-1 px-2 hover:text-[#d4af37] text-stone-400 transition-colors"
-                                >
-                                  <Minus size={12} />
-                                </button>
+  type="button"
+  onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+  className="p-1 px-2 hover:text-[#d4af37] text-stone-400 transition-colors"
+>
+  <Minus size={12} />
+</button>
                                 <span className="text-xs font-medium px-2 min-w-[20px] text-center">{item.quantity}</span>
-                                <button 
-                                  onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                                  className="p-1 px-2 hover:text-[#d4af37] text-stone-400 transition-colors"
-                                >
-                                  <Plus size={12} />
-                                </button>
+                              <button 
+  type="button"
+  onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+  className="p-1 px-2 hover:text-[#d4af37] text-stone-400 transition-colors"
+>
+  <Plus size={12} />
+</button>
                               </div>
 
                               <p className="text-sm font-light text-stone-300 tracking-wider">
@@ -214,11 +216,12 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                           </div>
 
                           <button 
-                            onClick={() => onRemoveItem(item.id)}
-                            className="absolute top-3 right-3 text-stone-500 hover:text-red-400 transition-colors"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+  type="button"
+  onClick={() => onRemoveItem(item.id)}
+  className="absolute top-3 right-3 text-stone-500 hover:text-red-400 transition-colors"
+>
+  <Trash2 size={14} />
+</button>
                         </div>
                       ))}
                     </div>
