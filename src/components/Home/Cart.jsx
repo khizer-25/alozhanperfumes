@@ -397,8 +397,7 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
 
                 {/* Submissions button handles switcher */}
                 {checkoutStep === 'cart' ? (
-                  <button 
-  type="button"
+                <button 
   onClick={handleCheckoutClick}
   disabled={cartItems.length === 0}
 >
