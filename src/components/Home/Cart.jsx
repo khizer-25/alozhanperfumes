@@ -346,16 +346,16 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                     You can monitor delivery logistics, view pricing breakdowns, and trace your courier packages at any time under your Profile Account.
                   </p>
 
-                  <button
-                    onClick={() => {
-                      onClose();
-                      setCheckoutStep('cart');
-                      navigate('/profile');
-                    }}
-                    className="mt-4 px-8 py-3 bg-[#d4af37] text-black font-bold text-xs tracking-widest uppercase hover:bg-[#b59223] transition-colors rounded-sm shadow-md"
-                  >
-                    Track In My Account
-                  </button>
+                 <button
+  type="button"
+  onClick={() => {
+    onClose();
+    setCheckoutStep('cart');
+    navigate('/profile');
+  }}
+>
+  Track In My Account
+</button>
                 </div>
               )}
 
@@ -398,12 +398,12 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                 {/* Submissions button handles switcher */}
                 {checkoutStep === 'cart' ? (
                   <button 
-                    onClick={handleCheckoutClick}
-                    disabled={cartItems.length === 0}
-                    className="w-full py-4 bg-[#d4af37] text-black font-bold text-xs tracking-[0.25em] uppercase hover:bg-[#a1811a] disabled:bg-stone-700 disabled:text-stone-500 disabled:cursor-not-allowed transition-all duration-300 rounded-sm shadow-md"
-                  >
-                    PROCEED TO CHECKOUT
-                  </button>
+  type="button"
+  onClick={handleCheckoutClick}
+  disabled={cartItems.length === 0}
+>
+  PROCEED TO CHECKOUT
+</button>
                 ) : (
                   <button
                     onClick={handlePlaceOrder}
