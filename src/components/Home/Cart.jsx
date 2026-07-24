@@ -137,16 +137,16 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                     {checkoutStep === 'success' && 'Purchase Completed'}
                   </h2>
                 </div>
-                <button 
-                  onClick={() => {
-                    onClose();
-                    // Reset steps on close so drawer resets
-                    setTimeout(() => setCheckoutStep('cart'), 300);
-                  }} 
-                  className="text-stone-400 hover:text-white hover:rotate-90 transition-transform duration-200"
-                >
-                  <X size={24} strokeWidth={1.5} />
-                </button>
+               <button 
+  type="button"
+  onClick={() => {
+    onClose();
+    setTimeout(() => setCheckoutStep('cart'), 300);
+  }} 
+  className="text-stone-400 hover:text-white hover:rotate-90 transition-transform duration-200"
+>
+  <X size={24} strokeWidth={1.5} />
+</button>
               </div>
             </div>
 
@@ -173,7 +173,7 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                     <div className="space-y-4">
                       {cartItems.map((item) => (
                         <div 
-                          key={item.id} 
+                          key={item._id}
                           className="flex gap-4 p-3 bg-white/5 border border-white/5 rounded-sm relative"
                         >
                           <div className="w-20 h-24 overflow-hidden rounded-sm flex-shrink-0 bg-stone-900 border border-white/5">
@@ -193,18 +193,20 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                             <div className="flex items-center justify-between">
                               <div className="flex items-center border border-white/10 rounded-sm bg-black/20">
                                 <button 
-                                  onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                                  className="p-1 px-2 hover:text-[#d4af37] text-stone-400 transition-colors"
-                                >
-                                  <Minus size={12} />
-                                </button>
+  type="button"
+  onClick={() => onUpdateQuantity(item._id, item.quantity - 1)}
+  className="p-1 px-2 hover:text-[#d4af37] text-stone-400 transition-colors"
+>
+  <Minus size={12} />
+</button>
                                 <span className="text-xs font-medium px-2 min-w-[20px] text-center">{item.quantity}</span>
-                                <button 
-                                  onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                                  className="p-1 px-2 hover:text-[#d4af37] text-stone-400 transition-colors"
-                                >
-                                  <Plus size={12} />
-                                </button>
+                              <button 
+  type="button"
+  onClick={() => onUpdateQuantity(item._id, item.quantity + 1)}
+  className="p-1 px-2 hover:text-[#d4af37] text-stone-400 transition-colors"
+>
+  <Plus size={12} />
+</button>
                               </div>
 
                               <p className="text-sm font-light text-stone-300 tracking-wider">
@@ -214,11 +216,12 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                           </div>
 
                           <button 
-                            onClick={() => onRemoveItem(item.id)}
-                            className="absolute top-3 right-3 text-stone-500 hover:text-red-400 transition-colors"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+  type="button"
+  onClick={() => onRemoveItem(item._id)}
+  className="absolute top-3 right-3 text-stone-500 hover:text-red-400 transition-colors"
+>
+  <Trash2 size={14} />
+</button>
                         </div>
                       ))}
                     </div>
@@ -343,16 +346,16 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                     You can monitor delivery logistics, view pricing breakdowns, and trace your courier packages at any time under your Profile Account.
                   </p>
 
-                  <button
-                    onClick={() => {
-                      onClose();
-                      setCheckoutStep('cart');
-                      navigate('/profile');
-                    }}
-                    className="mt-4 px-8 py-3 bg-[#d4af37] text-black font-bold text-xs tracking-widest uppercase hover:bg-[#b59223] transition-colors rounded-sm shadow-md"
-                  >
-                    Track In My Account
-                  </button>
+                 <button
+  type="button"
+  onClick={() => {
+    onClose();
+    setCheckoutStep('cart');
+    navigate('/profile');
+  }}
+>
+  Track In My Account
+</button>
                 </div>
               )}
 
@@ -394,22 +397,24 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
 
                 {/* Submissions button handles switcher */}
                 {checkoutStep === 'cart' ? (
-                  <button 
-                    onClick={handleCheckoutClick}
-                    disabled={cartItems.length === 0}
-                    className="w-full py-4 bg-[#d4af37] text-black font-bold text-xs tracking-[0.25em] uppercase hover:bg-[#a1811a] disabled:bg-stone-700 disabled:text-stone-500 disabled:cursor-not-allowed transition-all duration-300 rounded-sm shadow-md"
-                  >
-                    PROCEED TO CHECKOUT
-                  </button>
-                ) : (
-                  <button
-                    onClick={handlePlaceOrder}
-                    disabled={loading}
-                    className="w-full py-4 bg-[#d4af37] text-black font-bold text-xs tracking-[0.25em] uppercase hover:bg-[#a1811a] disabled:bg-stone-700 disabled:text-stone-500 disabled:cursor-not-allowed transition-all duration-300 rounded-sm shadow-md flex items-center justify-center gap-2"
-                  >
-                    {loading ? 'Processing payment...' : `PAY & PLACE ORDER ($${grandTotal.toFixed(2)})`}
-                  </button>
-                )}
+  <button
+    type="button"
+    onClick={handleCheckoutClick}
+    disabled={cartItems.length === 0}
+    className="w-full py-4 bg-[#d4af37] text-black font-bold text-xs tracking-[0.25em] uppercase hover:bg-[#a1811a] disabled:bg-stone-700 disabled:text-stone-500 disabled:cursor-not-allowed transition-all duration-300 rounded-sm shadow-md"
+  >
+    PROCEED TO CHECKOUT
+  </button>
+) : (
+  <button
+    type="button"
+    onClick={handlePlaceOrder}
+    disabled={loading}
+    className="w-full py-4 bg-[#d4af37] text-black font-bold text-xs tracking-[0.25em] uppercase hover:bg-[#a1811a] disabled:bg-stone-700 disabled:text-stone-500 disabled:cursor-not-allowed transition-all duration-300 rounded-sm shadow-md flex items-center justify-center gap-2"
+  >
+    {loading ? 'Processing payment...' : `PAY & PLACE ORDER ($${grandTotal.toFixed(2)})`}
+  </button>
+)}
               </div>
             )}
 
