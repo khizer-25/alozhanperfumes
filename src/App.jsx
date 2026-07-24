@@ -19,6 +19,9 @@ import ProductDetails from "./components/Products/ProductDetails";
 import ScrollGallery from "./components/Home/ScrollGallery";
 import AtmosphericCategories from "./components/AtmosphericCategories";
 import TickerSeparator from "./components/TickerSeparator";
+import SignatureScentSection from "./components/SignatureScentSection";
+import MoodCollectionGallery from "./components/MoodCollectionGallery";
+import ScentJourney from "./components/ScentJourney";
 
 function App() {
   const location = useLocation();
@@ -184,10 +187,15 @@ const existingItem = prevItems.find(
     return (
       <>
         <HomePage />
-        <ProductList onAddToCart={handleAddToCart} />
+        {/* <DeepSeek/>
+        <QwenCart/> */}
         <ScrollGallery/>
         <TickerSeparator/>
         <AtmosphericCategories />
+        <MoodCollectionGallery />
+        <ScentJourney />
+        <ProductList onAddToCart={handleAddToCart} />
+        <SignatureScentSection />
         <FeaturesSection />
         <ContactUs />
       </>
