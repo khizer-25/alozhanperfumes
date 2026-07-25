@@ -19,6 +19,76 @@ import ProductDetails from "./components/Products/ProductDetails";
 import ScrollGallery from "./components/Home/ScrollGallery";
 import AtmosphericCategories from "./components/AtmosphericCategories";
 import TickerSeparator from "./components/TickerSeparator";
+function Home({ onAddToCart }) {
+  return (
+    <>
+      <HomePage />
+      <ProductList onAddToCart={onAddToCart} />
+      <ScrollGallery />
+      <TickerSeparator />
+      <AtmosphericCategories />
+      <FeaturesSection />
+      <ContactUs />
+    </>
+  );
+}
+function ProtectedRoute({ children, user, location }) {
+  if (user && !user.name) {
+    return (
+      <div className="min-h-screen bg-[#fdfcf9] flex flex-col items-center justify-center font-sans antialiased text-[#362720]">
+        <div className="text-center space-y-4">
+          <p className="text-[#b38f44] text-[10px] tracking-[0.4em] uppercase font-bold animate-pulse">
+            Orvélia Parfums
+          </p>
+
+          <div className="w-12 h-[1px] bg-[#d4af37] mx-auto" />
+
+          <p className="text-xs text-stone-500 font-light animate-pulse">
+            Verifying premium atelier session...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        state={{ from: location }}
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+function AdminRoute({ children, user }) {
+  if (user && !user.name) {
+    return (
+      <div className="min-h-screen bg-[#fdfcf9] flex flex-col items-center justify-center font-sans antialiased text-[#362720]">
+        <div className="text-center space-y-4">
+          <p className="text-[#b38f44] text-[10px] tracking-[0.4em] uppercase font-bold animate-pulse">
+            Al Ozhan Perfumes
+          </p>
+
+          <div className="w-12 h-[1px] bg-[#d4af37] mx-auto" />
+
+          <p className="text-xs text-stone-500 font-light animate-pulse">
+            Authorizing administrative credentials...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
 
 function App() {
   const location = useLocation();
@@ -138,61 +208,10 @@ const existingItem = prevItems.find(
     setCartItems([]);
   };
 
-  // --- ROUTE PROTECTION COMPONENTS ---
-  const ProtectedRoute = ({ children }) => {
-    if (user && !user.name) {
-      return (
-        <div className="min-h-screen bg-[#fdfcf9] flex flex-col items-center justify-center font-sans antialiased text-[#362720]">
-          <div className="text-center space-y-4">
-            <p className="text-[#b38f44] text-[10px] tracking-[0.4em] uppercase font-bold animate-pulse">
-              Orvélia Parfums
-            </p>
-            <div className="w-12 h-[1px] bg-[#d4af37] mx-auto" />
-            <p className="text-xs text-stone-500 font-light animate-pulse">Verifying premium atelier session...</p>
-          </div>
-        </div>
-      );
-    }
-    if (!user) {
-      return <Navigate to="/login" state={{ from: location }} replace />;
-    }
-    return children;
-  };
 
-  const AdminRoute = ({ children }) => {
-    if (user && !user.name) {
-      return (
-        <div className="min-h-screen bg-[#fdfcf9] flex flex-col items-center justify-center font-sans antialiased text-[#362720]">
-          <div className="text-center space-y-4">
-            <p className="text-[#b38f44] text-[10px] tracking-[0.4em] uppercase font-bold animate-pulse">
-              Orvélia Parfums
-            </p>
-            <div className="w-12 h-[1px] bg-[#d4af37] mx-auto" />
-            <p className="text-xs text-stone-500 font-light animate-pulse">Authorizing administrative credentials...</p>
-          </div>
-        </div>
-      );
-    }
-    if (!user || user.role !== "admin") {
-      return <Navigate to="/" replace />;
-    }
-    return children;
-  };
 
-  // --- HOME PATH COMPONENT WRAPPER ---
-  const Home = () => {
-    return (
-      <>
-        <HomePage />
-        <ProductList onAddToCart={handleAddToCart} />
-        <ScrollGallery/>
-        <TickerSeparator/>
-        <AtmosphericCategories />
-        <FeaturesSection />
-        <ContactUs />
-      </>
-    );
-  };
+
+
 
   return (
     <div className="min-h-screen bg-[#fdfcf9] relative">
@@ -210,7 +229,10 @@ const existingItem = prevItems.find(
 
       <main>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route
+  path="/"
+  element={<Home onAddToCart={handleAddToCart} />}
+/>
           <Route path="/products" element={<Products onAddToCart={handleAddToCart} />} />
           <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
           
@@ -218,24 +240,23 @@ const existingItem = prevItems.find(
           <Route 
             path="/profile" 
             element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
+              <ProtectedRoute user={user} location={location}>
+  <Profile />
+</ProtectedRoute>
             } 
           />
-
           <Route 
             path="/checkout" 
             element={
-              <ProtectedRoute>
-                <Checkout 
-                  cartItems={cartItems} 
-                  clearCart={handleClearCart} 
-                  onUpdateQuantity={handleUpdateQuantity}
-                  onRemoveItem={handleRemoveItem}
-                  user={user}
-                />
-              </ProtectedRoute>
+              <ProtectedRoute user={user} location={location}>
+  <Checkout
+    cartItems={cartItems}
+    clearCart={handleClearCart}
+    onUpdateQuantity={handleUpdateQuantity}
+    onRemoveItem={handleRemoveItem}
+    user={user}
+  />
+</ProtectedRoute>
             } 
           />
 
@@ -243,9 +264,9 @@ const existingItem = prevItems.find(
           <Route 
             path="/admin" 
             element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
+              <AdminRoute user={user}>
+  <AdminDashboard />
+</AdminRoute>
             }/> 
             <Route 
             path="*" 
