@@ -19,19 +19,36 @@ import ProductDetails from "./components/Products/ProductDetails";
 import ScrollGallery from "./components/Home/ScrollGallery";
 import AtmosphericCategories from "./components/AtmosphericCategories";
 import TickerSeparator from "./components/TickerSeparator";
+import SignatureScentSection from "./components/SignatureScentSection";
+import MoodCollectionGallery from "./components/MoodCollectionGallery";
+import ScentJourney from "./components/ScentJourney";
+
 function Home({ onAddToCart }) {
   return (
     <>
       <HomePage />
-      <ProductList onAddToCart={onAddToCart} />
+
       <ScrollGallery />
+
       <TickerSeparator />
+
       <AtmosphericCategories />
+
+      <MoodCollectionGallery />
+
+      <ScentJourney />
+
+      <ProductList onAddToCart={onAddToCart} />
+
+      <SignatureScentSection />
+
       <FeaturesSection />
+
       <ContactUs />
     </>
   );
 }
+
 function ProtectedRoute({ children, user, location }) {
   if (user && !user.name) {
     return (
@@ -89,6 +106,9 @@ function AdminRoute({ children, user }) {
 
   return children;
 }
+
+
+
 
 function App() {
   const location = useLocation();
@@ -207,10 +227,6 @@ const existingItem = prevItems.find(
   const handleClearCart = () => {
     setCartItems([]);
   };
-
-
-
-
 
 
   return (
