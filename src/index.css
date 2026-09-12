@@ -3,8 +3,104 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --ink: #1c1a17;
+    --alabaster: #f6f3ec;
+    --paper: #ffffff;
+    --muted: #6b6459;
+    --line: #e4ddcf;
+    --gold: #9a7b4f;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply bg-[#efebe6] text-stone-900;
-    font-family: Inter, "Segoe UI", sans-serif;
+    background: var(--alabaster);
+    color: var(--ink);
+    font-family: "Jost", "Segoe UI", system-ui, sans-serif;
+    font-weight: 300;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: rgba(154, 123, 79, 0.22);
+  }
+
+  /* Firefox range accent */
+  input[type="range"] {
+    accent-color: var(--gold);
+  }
+}
+
+@layer components {
+  .container-lux {
+    @apply mx-auto w-full max-w-content px-6 md:px-10;
+  }
+
+  .eyebrow {
+    @apply text-[11px] uppercase tracking-eyebrow text-gold font-medium;
+  }
+
+  .rule {
+    @apply h-px w-14 bg-gold/50;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 text-[12px] font-medium uppercase tracking-[0.18em]
+           transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-ink text-alabaster px-8 py-4 hover:bg-gold-deep;
+  }
+
+  .btn-outline {
+    @apply btn border border-ink/25 text-ink px-8 py-4 hover:border-ink hover:bg-ink hover:text-alabaster;
+  }
+
+  .btn-gold {
+    @apply btn bg-gold text-white px-8 py-4 hover:bg-gold-deep;
+  }
+
+  .field {
+    @apply w-full border border-line bg-paper px-4 py-3 text-sm text-ink
+           placeholder:text-muted/60 focus:border-gold focus:outline-none transition-colors;
+  }
+
+  .label {
+    @apply block text-[10px] font-medium uppercase tracking-[0.2em] text-muted mb-1.5;
+  }
+
+  .card {
+    @apply bg-paper border border-line;
+  }
+
+  .link-underline {
+    @apply relative after:absolute after:left-0 after:-bottom-0.5 after:h-px after:w-0 after:bg-current
+           after:transition-all after:duration-300 hover:after:w-full;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(154,123,79,0.35); border-radius: 999px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
   }
 }

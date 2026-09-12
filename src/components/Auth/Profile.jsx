@@ -1,227 +1,311 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { User, ShieldCheck, Mail, Calendar, CreditCard, Truck, RefreshCw, ShoppingBag } from 'lucide-react';
-import { api } from '../../utils/api';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { LogOut, MapPin, Plus, Trash2, Package, RefreshCw } from "lucide-react";
+import { api } from "../../utils/api";
+import { useAuth } from "../../context/AuthContext";
+import useSettings from "../../hooks/useSettings";
+import { formatPrice, formatDate, titleCase } from "../../utils/format";
+import ReturnFlow from "./ReturnFlow";
 
-const Profile = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [user, setUser] = useState(null);
+const STATUS_STYLES = {
+  pending: "bg-[#efe9dd] text-muted",
+  processing: "bg-[#e8eef0] text-[#3d5a63]",
+  shipped: "bg-[#eae6f0] text-[#4b3f66]",
+  delivered: "bg-[#e6efe6] text-[#3c5a3c]",
+  cancelled: "bg-[#f2e4e2] text-[#7a3b34]",
+  refunded: "bg-[#e6efe6] text-[#3c5a3c]",
+};
 
-  const fetchOrders = async () => {
+const emptyAddress = {
+  label: "Home",
+  fullName: "",
+  phone: "",
+  line1: "",
+  line2: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  country: "India",
+};
+
+function AddressBook({ addresses, onChange }) {
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState(emptyAddress);
+  const [busy, setBusy] = useState(false);
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const save = async (e) => {
+    e.preventDefault();
+    setBusy(true);
     try {
-      setLoading(true);
-      setError('');
-      
-      // Load user profile details
-      const profile = await api.get('/auth/profile');
-      setUser(profile);
-
-      // Load user orders list
-      const ordersList = await api.get('/orders/myorders');
-      setOrders(ordersList);
-    } catch (err) {
-    setError(
-  err.message ||
-  "Unable to load your profile. Please try again."
-); 
+      const res = await api.post("/auth/me/addresses", form);
+      onChange(res.data);
+      setForm(emptyAddress);
+      setAdding(false);
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  const remove = async (id) => {
+    const res = await api.delete(`/auth/me/addresses/${id}`);
+    onChange(res.data);
+  };
 
   return (
-    <div className="min-h-screen bg-[#fdfcf9] pt-32 pb-24 px-6 font-sans antialiased text-[#362720]">
-      <div className="max-w-5xl mx-auto">
-        
-        {/* Page Title Header */}
-        <div className="text-center mb-12">
-          <p className="text-[#b38f44] text-xs tracking-[0.4em] mb-3 uppercase font-bold">Personal Vault</p>
-          <h1 className="text-4xl font-light text-[#261c16] tracking-tight">Atelier Profile & Orders</h1>
-          <div className="w-16 h-[1px] bg-[#d4af37] mx-auto mt-4" />
-        </div>
+    <section className="border border-line bg-paper p-6">
+      <div className="flex items-center justify-between border-b border-line pb-4">
+        <h2 className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-eyebrow text-gold">
+          <MapPin size={14} /> Saved addresses
+        </h2>
+        {!adding && (
+          <button
+            onClick={() => setAdding(true)}
+            className="flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] text-muted hover:text-ink"
+          >
+            <Plus size={13} /> Add
+          </button>
+        )}
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* User Account Info Sidebar panel */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white border border-stone-200 p-6 rounded-sm shadow-sm">
-              <h2 className="text-xs uppercase tracking-widest text-[#b38f44] font-bold mb-4 border-b border-stone-100 pb-2 flex items-center gap-2">
-                <User className="w-3.5 h-3.5" />
-                Account Credentials
-              </h2>
-              
-              {user ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#78532f]/10 text-[#78532f] flex items-center justify-center font-bold text-lg">
-                      {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-stone-800 text-sm">{user?.name || user?.email || 'User'}</h3>
-                      <span className="text-[10px] uppercase font-mono tracking-widest bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded-xs">
-                        {user.role}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2 text-xs text-stone-600 font-light pt-2">
-                    <p className="flex items-center gap-2">
-                      <Mail className="w-3.5 h-3.5 opacity-60 text-stone-500" />
-                      {user.email}
-                    </p>
-                    {user.role === 'admin' && (
-                      <p className="flex items-center gap-2 text-amber-800">
-                        <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                        Admin Access Enabled
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-6 text-stone-400 text-xs">
-                  {loading ? 'Retrieving profile...' : 'Failed to retrieve profile credentials'}
-                </div>
-              )}
+      <div className="mt-4 space-y-3">
+        {addresses.length === 0 && !adding && (
+          <p className="text-sm font-light text-muted">No addresses saved yet.</p>
+        )}
+        {addresses.map((a) => (
+          <div
+            key={a._id}
+            className="flex items-start justify-between border border-line px-4 py-3 text-sm font-light"
+          >
+            <div>
+              <p className="font-normal text-ink">
+                {a.fullName}{" "}
+                {a.isDefault && (
+                  <span className="ml-1 text-[10px] uppercase tracking-[0.14em] text-gold">
+                    Default
+                  </span>
+                )}
+              </p>
+              <p className="text-muted">
+                {a.line1}
+                {a.line2 ? `, ${a.line2}` : ""}, {a.city} {a.postalCode}
+              </p>
+              <p className="text-muted">{a.phone}</p>
             </div>
+            <button
+              onClick={() => remove(a._id)}
+              className="text-muted hover:text-ink"
+              aria-label="Delete address"
+            >
+              <Trash2 size={14} />
+            </button>
           </div>
+        ))}
+      </div>
 
-          {/* Main Orders List tracker container */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white border border-stone-200 p-6 rounded-sm shadow-sm">
-              <div className="flex justify-between items-center border-b border-stone-100 pb-4 mb-6">
-                <h2 className="text-xs uppercase tracking-widest text-stone-700 font-bold flex items-center gap-2">
-                  <ShoppingBag className="w-4 h-4 text-[#b38f44]" />
-                  Order Tracking History ({orders.length})
-                </h2>
-                <button 
-                  onClick={fetchOrders}
-                  className="p-1 text-stone-500 hover:text-[#b38f44] transition-colors"
-                  title="Reload orders"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </button>
+      {adding && (
+        <form onSubmit={save} className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input required placeholder="Full name" className="field" value={form.fullName} onChange={set("fullName")} />
+          <input required placeholder="Phone" className="field" value={form.phone} onChange={set("phone")} />
+          <input required placeholder="Address line 1" className="field sm:col-span-2" value={form.line1} onChange={set("line1")} />
+          <input placeholder="Address line 2 (optional)" className="field sm:col-span-2" value={form.line2} onChange={set("line2")} />
+          <input required placeholder="City" className="field" value={form.city} onChange={set("city")} />
+          <input placeholder="State" className="field" value={form.state} onChange={set("state")} />
+          <input required placeholder="Postal code" className="field" value={form.postalCode} onChange={set("postalCode")} />
+          <input required placeholder="Country" className="field" value={form.country} onChange={set("country")} />
+          <div className="flex gap-3 sm:col-span-2">
+            <button disabled={busy} className="btn-primary">
+              {busy ? "Saving…" : "Save address"}
+            </button>
+            <button type="button" onClick={() => setAdding(false)} className="btn-outline">
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+    </section>
+  );
+}
+
+export default function Profile() {
+  const { user, logout, refreshUser } = useAuth();
+  const settings = useSettings();
+  const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
+  const [returns, setReturns] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [addresses, setAddresses] = useState(user?.addresses || []);
+
+  const loadOrders = () => {
+    setLoading(true);
+    Promise.all([
+      api.get("/orders/mine").then((r) => setOrders(r.data)),
+      api.get("/returns/mine").then((r) => setReturns(r.data)).catch(() => {}),
+    ])
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  const returnForOrder = (orderId) =>
+    returns.find(
+      (r) => r.order === orderId && !["cancelled", "rejected"].includes(r.status)
+    ) || returns.find((r) => r.order === orderId);
+
+  useEffect(loadOrders, []);
+  useEffect(() => setAddresses(user?.addresses || []), [user]);
+
+  const cancelOrder = async (id) => {
+    if (!window.confirm("Cancel this order?")) return;
+    try {
+      await api.patch(`/orders/${id}/cancel`);
+      loadOrders();
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+  return (
+    <div className="container-lux py-14 md:py-20">
+      <header className="text-center">
+        <p className="eyebrow">Your account</p>
+        <h1 className="mt-3 text-4xl md:text-5xl">{user?.name}</h1>
+        <div className="rule mx-auto mt-4" />
+      </header>
+
+      <div className="mt-12 grid gap-8 lg:grid-cols-[320px_1fr]">
+        <div className="space-y-6">
+          <section className="border border-line bg-paper p-6">
+            <h2 className="text-[11px] font-medium uppercase tracking-eyebrow text-gold">
+              Details
+            </h2>
+            <dl className="mt-4 space-y-2 text-sm font-light">
+              <div className="flex justify-between">
+                <dt className="text-muted">Name</dt>
+                <dd>{user?.name}</dd>
               </div>
-
-              {loading ? (
-                <div className="text-center py-16 text-stone-500 text-xs tracking-widest">
-                  Loading your orders...
-                </div>
-              ) : error ? (
-                <div className="text-center py-12 text-red-700 text-xs bg-red-50 p-4 border border-red-200 rounded-sm">
-                  {error}
-                </div>
-              ) : orders.length === 0 ? (
-                <div className="text-center py-16 opacity-40">
-                  <ShoppingBag size={42} strokeWidth={1} className="mb-3 text-[#d4af37] mx-auto" />
-                  <p className="text-xs tracking-wider uppercase font-medium text-stone-600">You haven't placed any orders yet.
-Start exploring our collection.</p>
-                  
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {orders.map((order) => (
-                    <motion.div
-                      layout
-                      key={order._id}
-                      className="border border-stone-200 rounded-sm overflow-hidden p-5 space-y-4 hover:border-stone-300 transition-colors"
-                    >
-                      {/* Order Metadata Header row */}
-                      <div className="flex flex-wrap items-center justify-between gap-3 bg-stone-50/50 p-3 rounded-xs border border-stone-100 text-xs">
-                        <div className="font-mono text-[10px] text-stone-500">
-                          ID: <span className="font-semibold text-stone-700">{order._id}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[10px] text-stone-400 font-medium">
-                          <Calendar className="w-3.5 h-3.5 text-stone-400" />
-                          {new Date(order.createdAt).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Items List */}
-                      <div className="space-y-3 pt-2">
-                        {order.orderItems?.map((item) => (
-                          <div key={item._id} className="flex items-center gap-4 text-xs">
-                            <div className="w-12 h-14 bg-stone-100 rounded-xs overflow-hidden shrink-0 border border-stone-200/50">
-                              <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                            </div>
-                            <div className="flex-grow min-w-0">
-                              <h4 className="font-medium text-stone-800 truncate">{item.name}</h4>
-                             <p className="text-[9px] text-[#b38f44] tracking-wider uppercase font-semibold">
-  Qty: {item.qty} × ₹{item.price.toLocaleString("en-IN")}
-</p>
-                            </div>
-                            <div className="text-right text-stone-700 font-semibold font-mono">
-  ₹{(item.qty * item.price).toLocaleString("en-IN")}
-</div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Status Badges Row */}
-                      <div className="grid grid-cols-2 gap-4 border-t border-stone-100 pt-4 text-xs font-light text-stone-500">
-                        {/* Payment badge */}
-                        <div className="flex items-start gap-2">
-                          <CreditCard className="w-4 h-4 text-stone-400 mt-0.5 shrink-0" />
-                          <div>
-                            <span className="text-[9px] uppercase tracking-widest block font-bold text-stone-400 mb-0.5">Payment</span>
-                            {order.isPaid ? (
-                              <span className="inline-block bg-green-50 text-green-800 text-[9px] font-bold px-1.5 py-0.5 rounded-xs font-mono uppercase tracking-wider">
-                                Paid
-                              </span>
-                            ) : (
-                              <span className="inline-block bg-amber-50 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded-xs font-mono uppercase tracking-wider">
-                                Unpaid / COD
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Delivery badge */}
-                        <div className="flex items-start gap-2">
-                          <Truck className="w-4 h-4 text-stone-400 mt-0.5 shrink-0" />
-                          <div>
-                            <span className="text-[9px] uppercase tracking-widest block font-bold text-stone-400 mb-0.5">Courier</span>
-                            {order.isDelivered ? (
-                              <span className="inline-block bg-green-50 text-green-800 text-[9px] font-bold px-1.5 py-0.5 rounded-xs font-mono uppercase tracking-wider">
-                                Delivered
-                              </span>
-                            ) : (
-                              <span className="inline-block bg-stone-100 text-stone-600 text-[9px] font-bold px-1.5 py-0.5 rounded-xs font-mono uppercase tracking-wider">
-                                In Transit
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Pricing Footer */}
-                      <div className="border-t border-stone-100 pt-3 flex justify-between items-center text-xs">
-                        <span className="text-stone-400 uppercase tracking-widest font-medium text-[10px]">Grand Total</span>
-                        <span className="text-base font-semibold text-[#78532f] font-mono">
- ₹{Number(order.totalPrice).toLocaleString("en-IN")}
-</span>
-                      </div>
-                    </motion.div>
-                  ))}
+              <div className="flex justify-between">
+                <dt className="text-muted">Email</dt>
+                <dd className="truncate pl-4">{user?.email}</dd>
+              </div>
+              {user?.phone && (
+                <div className="flex justify-between">
+                  <dt className="text-muted">Phone</dt>
+                  <dd>{user.phone}</dd>
                 </div>
               )}
-            </div>
-          </div>
+              <div className="flex justify-between">
+                <dt className="text-muted">Member since</dt>
+                <dd>{formatDate(user?.createdAt)}</dd>
+              </div>
+            </dl>
+            <button
+              onClick={async () => {
+                await logout();
+                navigate("/");
+              }}
+              className="mt-5 flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-gold-deep hover:text-ink"
+            >
+              <LogOut size={13} /> Sign out
+            </button>
+          </section>
 
+          <AddressBook
+            addresses={addresses}
+            onChange={(next) => {
+              setAddresses(next);
+              refreshUser();
+            }}
+          />
         </div>
 
+        <section className="border border-line bg-paper p-6">
+          <div className="flex items-center justify-between border-b border-line pb-4">
+            <h2 className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-eyebrow text-gold">
+              <Package size={14} /> Orders ({orders.length})
+            </h2>
+            <button onClick={loadOrders} className="text-muted hover:text-ink" aria-label="Refresh">
+              <RefreshCw size={14} />
+            </button>
+          </div>
+
+          {loading ? (
+            <p className="py-16 text-center text-sm text-muted">Loading your orders…</p>
+          ) : orders.length === 0 ? (
+            <div className="py-16 text-center">
+              <p className="text-sm text-muted">You haven't placed an order yet.</p>
+              <button onClick={() => navigate("/products")} className="mt-4 btn-outline">
+                Start shopping
+              </button>
+            </div>
+          ) : (
+            <ul className="mt-4 space-y-5">
+              {orders.map((o) => (
+                <li key={o._id} className="border border-line">
+                  <div className="flex flex-wrap items-center justify-between gap-2 bg-alabaster px-4 py-3">
+                    <div>
+                      <p className="text-sm">{o.orderNumber}</p>
+                      <p className="text-[11px] uppercase tracking-[0.14em] text-muted">
+                        {formatDate(o.createdAt)} · {o.paymentMethod === "cod" ? "Cash on delivery" : "Paid online"}
+                      </p>
+                    </div>
+                    <span
+                      className={`px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] ${
+                        STATUS_STYLES[o.status] || "bg-[#efe9dd] text-muted"
+                      }`}
+                    >
+                      {titleCase(o.status)}
+                    </span>
+                  </div>
+                  <div className="divide-y divide-line px-4">
+                    {o.items.map((it) => (
+                      <div key={it._id} className="flex items-center gap-3 py-3">
+                        <div className="h-14 w-12 shrink-0 overflow-hidden bg-[#efe9dd]">
+                          {it.image && <img src={it.image} alt="" className="h-full w-full object-cover" />}
+                        </div>
+                        <div className="flex-1 text-sm">
+                          <p className="font-serif">{it.name}</p>
+                          <p className="text-[11px] uppercase tracking-[0.14em] text-muted">
+                            {it.size} {it.unit} · Qty {it.qty}
+                          </p>
+                        </div>
+                        <p className="text-sm tabular-nums">{formatPrice(it.price * it.qty)}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between border-t border-line px-4 py-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted">
+                      Total
+                    </span>
+                    <span className="font-serif text-lg">{formatPrice(o.totalPrice)}</span>
+                  </div>
+                  {o.trackingNumber && (
+                    <div className="border-t border-line px-4 py-2 text-[11px] uppercase tracking-[0.14em] text-muted">
+                      Tracking: <span className="text-ink">{o.trackingNumber}</span>
+                      {o.carrier ? ` · ${o.carrier}` : ""}
+                    </div>
+                  )}
+                  {["pending", "processing"].includes(o.status) && (
+                    <div className="border-t border-line px-4 py-2 text-right">
+                      <button
+                        onClick={() => cancelOrder(o._id)}
+                        className="text-[11px] uppercase tracking-[0.14em] text-gold-deep hover:text-ink"
+                      >
+                        Cancel order
+                      </button>
+                    </div>
+                  )}
+                  <ReturnFlow
+                    order={o}
+                    existingReturn={returnForOrder(o._id)}
+                    returnWindowDays={settings.returnWindowDays}
+                    onDone={loadOrders}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
     </div>
   );
-};
-
-export default Profile;
+}

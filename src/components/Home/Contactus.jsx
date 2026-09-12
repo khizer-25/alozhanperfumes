@@ -1,100 +1,132 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Send, CheckCircle2, AlertCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Check } from "lucide-react";
+import { api } from "../../utils/api";
+import useSettings from "../../hooks/useSettings";
 
-function ContactUs() {
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState({ loading: false, success: false, error: null });
+export default function Contact({ embedded = false }) {
+  const settings = useSettings();
+  const Heading = embedded ? "h2" : "h1";
+  const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
+  const [state, setState] = useState("idle"); // idle | sending | sent | error
+  const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    setStatus({ loading: true, success: false, error: null });
-
+    setState("sending");
+    setError("");
     try {
-      const response = await fetch("https://alozhan-backend.onrender.com/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setStatus({ loading: false, success: true, error: null });
-        setFormData({ name: "", email: "", message: "" });
-      } else {
-        throw new Error("Transmission route failed.");
-      }
+      await api.post("/queries", form);
+      setState("sent");
+      setForm({ name: "", email: "", phone: "", subject: "", message: "" });
     } catch (err) {
-      setStatus({ 
-        loading: false, 
-        success: false, 
-        error: "Could not send message. Please verify setup configuration parameters." 
-      });
+      setError(err.message || "Message could not be sent.");
+      setState("error");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#fdfcf9] px-4 pt-32 pb-16 flex flex-col items-center justify-center font-sans text-[#261c16]">
-      <motion.div 
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-xl mx-auto"
-      >
-        <div className="text-center mb-12">
-          <p className="text-xs uppercase tracking-[0.25em] text-[#b38f44] mb-2 font-semibold">Direct Pipeline</p>
-          <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-[#261c16] mb-4">
-            Contact House
-          </h2>
-          <div className="w-12 h-[1px] bg-[#b38f44] mx-auto mb-4" />
+    <div
+      id="contact"
+      className={
+        embedded
+          ? "border-t border-line bg-[#f1ece0] py-16 md:py-24"
+          : "container-lux py-16 md:py-24"
+      }
+    >
+      <div className={`grid gap-14 lg:grid-cols-2 ${embedded ? "container-lux" : ""}`}>
+        <div>
+          <p className="eyebrow">Get in touch</p>
+          <Heading className="mt-3 text-4xl md:text-5xl">We read every message</Heading>
+          <div className="rule mt-5" />
+          <p className="mt-6 max-w-md text-sm font-light leading-[1.9] text-muted">
+            Questions about a fragrance, an order, or a bespoke commission? Write to us
+            and someone from the atelier will reply within one working day.
+          </p>
+
+          <dl className="mt-10 space-y-5 text-sm font-light">
+            <div className="flex items-start gap-3">
+              <Mail size={16} className="mt-0.5 text-gold" />
+              <div>
+                <dt className="text-[11px] uppercase tracking-[0.16em] text-muted">Email</dt>
+                <dd>{settings.supportEmail}</dd>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Phone size={16} className="mt-0.5 text-gold" />
+              <div>
+                <dt className="text-[11px] uppercase tracking-[0.16em] text-muted">Phone</dt>
+                <dd>{settings.supportPhone}</dd>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <MapPin size={16} className="mt-0.5 text-gold" />
+              <div>
+                <dt className="text-[11px] uppercase tracking-[0.16em] text-muted">Atelier</dt>
+                <dd>{settings.address}</dd>
+              </div>
+            </div>
+          </dl>
         </div>
 
-        <AnimatePresence mode="wait">
-          {status.success ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-[#261c16] rounded-2xl p-8 text-center text-white shadow-xl"
-            >
-              <CheckCircle2 className="mx-auto text-[#d4af37] mb-4" size={48} strokeWidth={1} />
-              <h3 className="text-xl font-bold uppercase tracking-tight mb-2">Sent Successfully</h3>
-              <p className="text-stone-400 text-sm">Your mail has been sent directly to your inbox backend.</p>
-            </motion.div>
+        <div className="border border-line bg-paper p-8">
+          {state === "sent" ? (
+            <div className="flex flex-col items-center py-16 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold text-white">
+                <Check size={22} />
+              </div>
+              <h2 className="mt-5 text-2xl">Message sent</h2>
+              <p className="mt-2 text-sm font-light text-muted">
+                Thank you — we'll be in touch shortly.
+              </p>
+              <button onClick={() => setState("idle")} className="mt-6 btn-outline">
+                Send another
+              </button>
+            </div>
           ) : (
-            <form onSubmit={handleSubmit} className="bg-white/60 border border-stone-200/60 rounded-3xl p-6 md:p-10 backdrop-blur-xl space-y-6">
-              {status.error && (
-                <div className="p-4 bg-red-50 text-red-700 rounded-xl text-xs flex items-center gap-2">
-                  <AlertCircle size={16} />
-                  <span>{status.error}</span>
-                </div>
+            <form onSubmit={submit} className="space-y-4">
+              {error && (
+                <p className="border-l-2 border-red-500 bg-red-50 px-4 py-3 text-xs text-red-800">
+                  {error}
+                </p>
               )}
-
-              <div className="space-y-1.5">
-                <label className="text-xs uppercase tracking-wider font-semibold text-stone-600">Full Name</label>
-                <input type="text" name="name" required value={formData.name} onChange={handleChange} placeholder="Alexander Mercer" className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none text-sm" />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="label">Name</label>
+                  <input required className="field" value={form.name} onChange={set("name")} />
+                </div>
+                <div>
+                  <label className="label">Email</label>
+                  <input required type="email" className="field" value={form.email} onChange={set("email")} />
+                </div>
               </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs uppercase tracking-wider font-semibold text-stone-600">Email Address</label>
-                <input type="email" name="email" required value={formData.email} onChange={handleChange} placeholder="alexander@example.com" className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none text-sm" />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="label">Phone (optional)</label>
+                  <input className="field" value={form.phone} onChange={set("phone")} />
+                </div>
+                <div>
+                  <label className="label">Subject</label>
+                  <input className="field" value={form.subject} onChange={set("subject")} placeholder="General enquiry" />
+                </div>
               </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs uppercase tracking-wider font-semibold text-stone-600">Your Message</label>
-                <textarea name="message" required rows={5} value={formData.message} onChange={handleChange} placeholder="Write your thoughts here..." className="w-full px-4 py-3 rounded-xl bg-white border border-stone-200 focus:outline-none text-sm resize-none" />
+              <div>
+                <label className="label">Message</label>
+                <textarea
+                  required
+                  className="field min-h-[140px] resize-y"
+                  value={form.message}
+                  onChange={set("message")}
+                />
               </div>
-
-              <button type="submit" disabled={status.loading} className="w-full flex items-center justify-center gap-2 bg-[#261c16] text-white py-3.5 px-6 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#362720] transition-colors disabled:opacity-50">
-                {status.loading ? <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><span>Send Message</span><Send size={12} /></>}
+              <button disabled={state === "sending"} className="w-full btn-primary py-4">
+                {state === "sending" ? "Sending…" : "Send message"}
               </button>
             </form>
           )}
-        </AnimatePresence>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 }
-
-export default ContactUs;
