@@ -180,7 +180,7 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, clea
                             {item.image.startsWith('http') ? (
                               <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                             ) : (
-                              <img src={`http://localhost:5000${item.image}`} alt={item.name} className="w-full h-full object-cover" />
+                             <img src={`https://alozhan-backend.onrender.com${item.image}`} alt={item.name} className="w-full h-full object-cover" />
                             )}
                           </div>
                           
