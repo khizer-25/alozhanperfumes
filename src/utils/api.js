@@ -8,7 +8,7 @@
  *   the original request.
  */
 
-const BASE_URL =import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "https://alozhan-backend.onrender.com/api";
+const BASE_URL = "https://alozhan-backend.onrender.com/api";
 
 let accessToken = null;
 let onAuthLost = null; // set by AuthContext — called when refresh fails
