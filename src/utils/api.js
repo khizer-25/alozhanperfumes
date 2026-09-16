@@ -8,7 +8,9 @@
  *   the original request.
  */
 
-const BASE_URL = "https://alozhan-backend.onrender.com/api";
+const BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://alozhan-backend.onrender.com/api";
 
 let accessToken = null;
 let onAuthLost = null; // set by AuthContext — called when refresh fails
@@ -91,7 +93,13 @@ const request = async (method, endpoint, body, { retry = true, headers = {} } = 
     body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
   });
 
-  if (res.status === 401 && retry && !endpoint.startsWith("/auth/login") && !endpoint.startsWith("/auth/register")) {
+  if (
+    res.status === 401 &&
+    retry &&
+    !endpoint.startsWith("/auth/login") &&
+    !endpoint.startsWith("/auth/register") &&
+    !endpoint.startsWith("/auth/refresh")
+  ) {
     try {
       await tryRefresh();
       return request(method, endpoint, body, { retry: false, headers });

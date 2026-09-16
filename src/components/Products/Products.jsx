@@ -14,20 +14,10 @@ const SORTS = [
 
 const PAGE_SIZE = 9;
 
-const fetchAllProducts = async () => {
-  const first = await api.get("/products?limit=100&isActive=true");
-  const pages = first.pages || 1;
-  const rest = await Promise.all(
-    Array.from({ length: pages - 1 }, (_, i) =>
-      api.get(`/products?limit=100&isActive=true&page=${i + 2}`)
-    )
-  );
-  return [first, ...rest].flatMap((res) => res.data);
-};
-
 export default function Products() {
   const [params, setParams] = useSearchParams();
-  const [all, setAll] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [state, setState] = useState("loading");
   const [showFilters, setShowFilters] = useState(false);
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
@@ -42,49 +32,40 @@ export default function Products() {
     if (!value || value === "all") next.delete(key);
     else next.set(key, value);
     setParams(next, { replace: true });
+    setDisplayCount(PAGE_SIZE);
   };
 
   useEffect(() => {
     let alive = true;
     setState("loading");
-    fetchAllProducts()
-      .then((data) => {
+
+    const queryParams = new URLSearchParams();
+    queryParams.set("limit", String(displayCount));
+    queryParams.set("isActive", "true");
+    if (type !== "all") queryParams.set("type", type);
+    if (gender !== "all") queryParams.set("gender", gender);
+    if (sort) queryParams.set("sort", sort);
+    if (search) queryParams.set("search", search);
+
+    api
+      .get(`/products?${queryParams.toString()}`)
+      .then((res) => {
         if (!alive) return;
-        setAll(normalizeProducts(data));
+        const list = normalizeProducts(res.data || []);
+        setProducts(list);
+        setTotalProducts(res.total ?? list.length);
         setState("done");
       })
       .catch(() => alive && setState("error"));
+
     return () => {
       alive = false;
     };
-  }, []);
+  }, [type, gender, sort, search, displayCount]);
 
-  const visible = useMemo(() => {
-    let list = all.filter((p) => {
-      if (type !== "all" && p.type !== type) return false;
-      if (gender !== "all" && p.gender !== gender && p.gender !== "unisex") return false;
-      if (search) {
-        const hay = `${p.name} ${p.brand} ${p.family} ${p.tagline} ${p.notes.top.join(" ")} ${p.notes.heart.join(" ")}`.toLowerCase();
-        if (!hay.includes(search.toLowerCase())) return false;
-      }
-      return true;
-    });
-
-    list = [...list].sort((a, b) => {
-      if (sort === "name") return a.name.localeCompare(b.name);
-      if (sort === "price") return (a.startingPrice ?? 1e9) - (b.startingPrice ?? 1e9);
-      if (sort === "-price") return (b.startingPrice ?? 0) - (a.startingPrice ?? 0);
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    });
-    return list;
-  }, [all, type, gender, search, sort]);
-
-  useEffect(() => {
-    setDisplayCount(PAGE_SIZE);
-  }, [type, gender, search, sort]);
-
-  const shown = visible.slice(0, displayCount);
-  const hasMore = displayCount < visible.length;
+  const visible = products;
+  const shown = products;
+  const hasMore = displayCount < totalProducts;
 
   const activeFilterCount = (type !== "all") + (gender !== "all") + (search ? 1 : 0);
 
