@@ -5,24 +5,40 @@ import { formatPrice } from "../../../utils/format";
 import { PanelHeader, EmptyState, StatusPill } from "../ui";
 import ProductForm from "./ProductForm";
 
+const PAGE_SIZE = 25;
+
+const fetchAllProducts = async () => {
+  const first = await api.get("/products?limit=100");
+  const rest = await Promise.all(
+    Array.from({ length: (first.pages || 1) - 1 }, (_, i) =>
+      api.get(`/products?limit=100&page=${i + 2}`)
+    )
+  );
+  return [first, ...rest].flatMap((res) => res.data);
+};
+
 export default function ProductsPanel({ notify }) {
   const [products, setProducts] = useState([]);
   const [state, setState] = useState("loading");
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState(null); // product | "new" | null
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
 
   const load = useCallback(() => {
     setState("loading");
-    api
-      .get("/products?limit=100")
-      .then((res) => {
-        setProducts(res.data);
+    fetchAllProducts()
+      .then((data) => {
+        setProducts(data);
         setState("done");
       })
       .catch(() => setState("error"));
   }, []);
 
   useEffect(load, [load]);
+
+  useEffect(() => {
+    setDisplayCount(PAGE_SIZE);
+  }, [search]);
 
   const remove = async (p) => {
     if (!window.confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
@@ -38,6 +54,9 @@ export default function ProductsPanel({ notify }) {
   const filtered = products.filter((p) =>
     `${p.name} ${p.brand} ${p.family}`.toLowerCase().includes(search.toLowerCase())
   );
+
+  const shown = filtered.slice(0, displayCount);
+  const hasMore = displayCount < filtered.length;
 
   return (
     <>
@@ -67,7 +86,7 @@ export default function ProductsPanel({ notify }) {
 
       {state === "done" && filtered.length > 0 && (
         <div className="divide-y divide-line border border-line bg-paper">
-          {filtered.map((p) => {
+          {shown.map((p) => {
             const stock = (p.variants || []).reduce((s, v) => s + (v.stock || 0), 0);
             return (
               <div key={p._id} className="flex items-center gap-4 px-4 py-3">
@@ -86,7 +105,7 @@ export default function ProductsPanel({ notify }) {
                     )}
                   </p>
                   <p className="text-[11px] font-light text-muted">
-                    {p.type} · {p.gender} · {(p.variants || []).length} sizes
+                    {p.type} · {p.gender} · {(p.variants || []).length} {(p.variants || []).length === 1 ? "size" : "sizes"}
                   </p>
                 </div>
                 <div className="hidden text-right text-sm sm:block">
@@ -123,6 +142,17 @@ export default function ProductsPanel({ notify }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {state === "done" && hasMore && (
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-muted">
+            Showing {shown.length} of {filtered.length}
+          </p>
+          <button onClick={() => setDisplayCount((c) => c + PAGE_SIZE)} className="btn-outline">
+            Load more
+          </button>
         </div>
       )}
 

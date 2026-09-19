@@ -54,6 +54,8 @@ export default function Checkout() {
   const tax = Math.round((subtotal * (settings.taxRatePercent || 0)) / 100);
   const total = subtotal + shipping + tax;
 
+  const onlineEnabled = !!settings.onlinePaymentsEnabled;
+
   const codBlocked =
     payment === "cod" &&
     (!settings.codEnabled ||
@@ -270,27 +272,31 @@ export default function Checkout() {
                     Pay the courier when your order arrives.
                   </span>
                 </label>
-                <label
-                  className={`flex cursor-pointer items-start gap-3 border px-4 py-3 text-sm ${
-                    payment === "online" ? "border-ink" : "border-line"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    checked={payment === "online"}
-                    onChange={() => setPayment("online")}
-                    className="mt-1 accent-[color:var(--gold)]"
-                  />
-                  <span className="font-light">
-                    <span className="block font-normal text-ink">Pay online</span>
-                    Secure card / UPI checkout (simulated in this demo — marked paid instantly).
-                  </span>
-                </label>
+                {onlineEnabled && (
+                  <label
+                    className={`flex cursor-pointer items-start gap-3 border px-4 py-3 text-sm ${
+                      payment === "online" ? "border-ink" : "border-line"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      checked={payment === "online"}
+                      onChange={() => setPayment("online")}
+                      className="mt-1 accent-[color:var(--gold)]"
+                    />
+                    <span className="font-light">
+                      <span className="block font-normal text-ink">Pay online</span>
+                      Secure card / UPI checkout.
+                    </span>
+                  </label>
+                )}
               </div>
 
               {codBlocked && (
                 <p className="border-l-2 border-gold bg-[#f4efe4] px-4 py-3 text-xs text-gold-deep">
-                  Cash on delivery isn't available for this order total. Please choose Pay online.
+                  {onlineEnabled
+                    ? "Cash on delivery isn't available for this order total. Please choose Pay online."
+                    : "Cash on delivery isn't available for this order total. Please reduce your bag or contact us to arrange payment."}
                 </p>
               )}
 

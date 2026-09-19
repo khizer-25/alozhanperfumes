@@ -14,6 +14,7 @@ const FALLBACK = {
   shippingFee: 199,
   taxRatePercent: 0,
   codEnabled: true,
+  onlinePaymentsEnabled: false,
   codMinOrder: 0,
   codMaxOrder: 20000,
   announcement: "Complimentary shipping on orders over ₹4,999",

@@ -92,7 +92,13 @@ const request = async (method, endpoint, body, { retry = true, headers = {} } = 
     body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
   });
 
-  if (res.status === 401 && retry && !endpoint.startsWith("/auth/login") && !endpoint.startsWith("/auth/register")) {
+  if (
+    res.status === 401 &&
+    retry &&
+    !endpoint.startsWith("/auth/login") &&
+    !endpoint.startsWith("/auth/register") &&
+    !endpoint.startsWith("/auth/refresh")
+  ) {
     try {
       await tryRefresh();
       return request(method, endpoint, body, { retry: false, headers });

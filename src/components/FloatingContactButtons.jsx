@@ -24,7 +24,7 @@ export default function FloatingContactButtons() {
             <FaWhatsapp size={20} />
           </a>
           <a
-            href={`tel:${settings.supportPhone}`}
+            href={`tel:${String(settings.supportPhone).replace(/[^\d+]/g, "")}`}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-alabaster shadow-lift transition-transform hover:scale-105"
             aria-label="Call"
           >
