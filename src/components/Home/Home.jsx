@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Leaf, FlaskConical, Package, Sparkles } from "lucide-react";
@@ -58,7 +58,7 @@ function HeroVideo() {
   return (
     <video
       ref={ref}
-      className="absolute inset-0 h-full w-full object-cover"
+      className="absolute inset-0 h-full w-full object-cover object-[80%_center] md:object-center"
       src="/media/hero-perfume.mp4"
       poster="/media/hero-poster.jpg"
       autoPlay
@@ -71,20 +71,169 @@ function HeroVideo() {
   );
 }
 
+/**
+ * Phones get their own portrait films instead of the cropped landscape one:
+ * a perfume film, then an attar film, looping. Each clip dips through black at
+ * both ends, so the hand-over between them (and the loop) is seamless. The
+ * idle clip is preloaded and faded in while the other fades out.
+ */
+const MOBILE_CLIPS = [
+  { src: "/media/hero-m-perfume.mp4", poster: "/media/hero-m-perfume.jpg", label: "Perfumes" },
+  { src: "/media/hero-m-attar.mp4", poster: "/media/hero-m-attar.jpg", label: "Attars" },
+];
+
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(query).matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = () => setMatches(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [query]);
+  return matches;
+}
+
+function MobileHeroVideos({ onFail }) {
+  const refs = useRef([]);
+  const [active, setActive] = useState(0);
+  const [still, setStill] = useState(false);
+
+  // Data-saver users get the poster frame only. (Reduced-motion is deliberately not
+  // used: it is on by default on many phones/PCs with animations turned off, and
+  // would stop the film for them; these are slow, muted ambient clips.)
+  useEffect(() => {
+    if (navigator.connection && navigator.connection.saveData) setStill(true);
+  }, []);
+
+  useEffect(() => {
+    if (still) return undefined;
+    const cur = refs.current[active];
+    const other = refs.current[1 - active];
+    if (!cur) return undefined;
+    cur.muted = true;
+    cur.defaultMuted = true;
+    try {
+      cur.currentTime = 0;
+    } catch {
+      /* not seekable yet */
+    }
+
+    let done = false;
+    const events = ["pointerdown", "touchstart", "scroll"];
+    const removeInteraction = () => events.forEach((e) => window.removeEventListener(e, kick));
+    function kick() {
+      if (done) return;
+      const p = cur.play();
+      if (p && p.then) {
+        p.then(() => {
+          done = true;
+          removeInteraction();
+        }).catch(() => {});
+      }
+    }
+    kick();
+    cur.addEventListener("canplay", kick);
+    document.addEventListener("visibilitychange", kick);
+    events.forEach((e) => window.addEventListener(e, kick, { passive: true }));
+
+    // once the fade has finished, park the clip that just left the stage
+    const park = setTimeout(() => {
+      if (other) other.pause();
+    }, 800);
+
+    return () => {
+      clearTimeout(park);
+      cur.removeEventListener("canplay", kick);
+      document.removeEventListener("visibilitychange", kick);
+      removeInteraction();
+    };
+  }, [active, still]);
+
+  if (still) {
+    return (
+      <img
+        src={MOBILE_CLIPS[0].poster}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover object-[50%_18%]"
+        aria-hidden="true"
+      />
+    );
+  }
+
+  return (
+    <>
+      {MOBILE_CLIPS.map((clip, i) => (
+        <video
+          key={clip.src}
+          ref={(el) => (refs.current[i] = el)}
+          className={`absolute inset-0 h-full w-full object-cover object-[50%_18%] transition-opacity duration-700 ${
+            active === i ? "opacity-100" : "opacity-0"
+          }`}
+          src={clip.src}
+          poster={clip.poster}
+          autoPlay={i === 0}
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+          onEnded={() => active === i && setActive(1 - i)}
+          onError={onFail}
+        />
+      ))}
+      {/* which film is playing */}
+      <div className="absolute right-5 top-28 z-10 flex flex-col items-end gap-2" aria-hidden="true">
+        <span
+          key={active}
+          className="animate-fade-up text-[10px] uppercase tracking-[0.28em] text-gold-soft"
+        >
+          {MOBILE_CLIPS[active].label}
+        </span>
+        <span className="flex gap-1.5">
+          {MOBILE_CLIPS.map((c, i) => (
+            <span
+              key={c.label}
+              className={`h-[2px] w-6 transition-colors duration-500 ${
+                active === i ? "bg-gold-soft" : "bg-alabaster/25"
+              }`}
+            />
+          ))}
+        </span>
+      </div>
+    </>
+  );
+}
+
+/** Picks the right film for the screen: portrait playlist on phones, landscape film elsewhere. */
+function HeroBackdrop() {
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const [mobileFailed, setMobileFailed] = useState(false);
+  if (isMobile && !mobileFailed) return <MobileHeroVideos onFail={() => setMobileFailed(true)} />;
+  return <HeroVideo />;
+}
+
 function Hero() {
   return (
-    <section className="relative min-h-[88vh] w-full overflow-hidden bg-ink">
+    <section className="relative w-full overflow-hidden bg-ink md:min-h-[88vh]">
       {/* Fallback backdrop — shows if the video and poster both fail. */}
-      <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_78%_18%,#4a3f36_0%,#2a2521_45%,#191612_100%)]" />
+      <div className="absolute inset-x-0 top-0 h-[58vh] bg-[radial-gradient(120%_90%_at_78%_18%,#4a3f36_0%,#2a2521_45%,#191612_100%)] md:inset-0 md:h-auto" />
 
-      <HeroVideo />
+      {/* Phones: the film gets its own clear area at the top; desktop: full-bleed behind the copy */}
+      <div className="absolute inset-x-0 top-0 h-[58vh] md:inset-0 md:h-auto">
+        <HeroBackdrop />
+      </div>
 
-      {/* Legibility + tone: darken toward the bottom-left where the copy sits */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-ink via-ink/70 to-ink/25" />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/40" />
-      <div className="absolute -right-24 top-10 h-[520px] w-[520px] rounded-full bg-gold/15 blur-[120px]" />
+      {/* Desktop: darken toward the bottom-left where the copy sits */}
+      <div className="absolute inset-0 hidden bg-gradient-to-tr from-ink via-ink/70 to-ink/25 md:block" />
+      <div className="absolute inset-0 hidden bg-gradient-to-t from-ink via-transparent to-ink/40 md:block" />
+      {/* Phones: soft fade from the film into the ink panel behind the copy, plus a header scrim */}
+      <div className="absolute inset-x-0 top-0 h-[58vh] bg-gradient-to-t from-ink via-ink/25 via-[28%] to-transparent md:hidden" />
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-ink/55 to-transparent md:hidden" />
+      <div className="absolute -right-24 top-10 hidden h-[520px] w-[520px] rounded-full bg-gold/15 blur-[120px] md:block" />
 
-      <div className="container-lux relative flex min-h-[88vh] flex-col justify-end pb-20 pt-40 text-alabaster">
+      <div className="container-lux relative flex flex-col justify-end pb-16 pt-[50vh] text-alabaster md:min-h-[88vh] md:pb-20 md:pt-40">
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
