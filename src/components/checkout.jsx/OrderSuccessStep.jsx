@@ -46,7 +46,7 @@ const OrderSuccessStep = ({ placedOrder, copiedId, onCopy, onTrackOrder, onConti
           {placedOrder.orderItems.map((item, idx) => (
             <div key={idx} className="flex gap-3 text-xs">
               <img
-                src={item.image.startsWith('http') ? item.image : `http://localhost:5000${item.image}`}
+                src={item.image.startsWith('http') ? item.image : `https://alozhan-backend.onrender.com${item.image}`}
                 alt={item.name}
                 className="w-10 h-12 object-cover rounded-md border border-stone-200 shrink-0"
               />

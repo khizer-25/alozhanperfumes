@@ -9,7 +9,8 @@
  */
 
 const BASE_URL =
-  import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:5000/api";
+  import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
+  "https://ozhan-back.onrender.com/api";
 
 let accessToken = null;
 let onAuthLost = null; // set by AuthContext — called when refresh fails

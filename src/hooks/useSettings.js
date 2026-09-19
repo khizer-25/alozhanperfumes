@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../utils/api";
 
 let cache = null;
+let settingsPromise = null;
 
 const FALLBACK = {
   storeName: "Al Özhan Perfumes",
@@ -22,20 +23,33 @@ const FALLBACK = {
   social: {},
 };
 
+const fetchSettings = () => {
+  if (cache) return Promise.resolve(cache);
+  if (!settingsPromise) {
+    settingsPromise = api
+      .get("/settings")
+      .then((res) => {
+        const payload = res?.data || res || {};
+        cache = { ...FALLBACK, ...payload };
+        return cache;
+      })
+      .catch(() => {
+        settingsPromise = null;
+        return FALLBACK;
+      });
+  }
+  return settingsPromise;
+};
+
 /** Store-wide settings, fetched once and cached for the session. */
 export default function useSettings() {
   const [settings, setSettings] = useState(cache || FALLBACK);
 
   useEffect(() => {
-    if (cache) return;
     let alive = true;
-    api
-      .get("/settings")
-      .then((res) => {
-        cache = { ...FALLBACK, ...res.data };
-        if (alive) setSettings(cache);
-      })
-      .catch(() => {});
+    fetchSettings().then((data) => {
+      if (alive) setSettings(data);
+    });
     return () => {
       alive = false;
     };

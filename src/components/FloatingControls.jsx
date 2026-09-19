@@ -23,7 +23,7 @@ function FloatingControls({ cartItems, onOpenCart, onAddToCart }) {
   const itemImageUrl = latestItem
     ? latestItem.image.startsWith("http")
       ? latestItem.image
-      : `https://ozhan-backend.onrender.com${latestItem.image}`
+      : `https://ozhan-back.onrender.com${latestItem.image}`
     : "";
 
   return (

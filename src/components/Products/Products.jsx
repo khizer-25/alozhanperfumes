@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { api } from "../../utils/api";
@@ -14,28 +14,24 @@ const SORTS = [
 
 const PAGE_SIZE = 9;
 
-const fetchAllProducts = async () => {
-  const first = await api.get("/products?limit=100&isActive=true");
-  const pages = first.pages || 1;
-  const rest = await Promise.all(
-    Array.from({ length: pages - 1 }, (_, i) =>
-      api.get(`/products?limit=100&isActive=true&page=${i + 2}`)
-    )
-  );
-  return [first, ...rest].flatMap((res) => res.data);
-};
-
 export default function Products() {
   const [params, setParams] = useSearchParams();
-  const [all, setAll] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [state, setState] = useState("loading");
+  const [loadingMore, setLoadingMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
 
   const type = params.get("type") || "all";
   const gender = params.get("gender") || "all";
   const sort = params.get("sort") || "-createdAt";
   const search = params.get("q") || "";
+
+  // The page counter is tied to the current filters, so any filter/search/sort
+  // change (including via a link) starts again from page 1.
+  const filterKey = `${type}|${gender}|${sort}|${search}`;
+  const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
+  const page = pageState.key === filterKey ? pageState.page : 1;
 
   const setParam = (key, value) => {
     const next = new URLSearchParams(params);
@@ -46,45 +42,46 @@ export default function Products() {
 
   useEffect(() => {
     let alive = true;
-    setState("loading");
-    fetchAllProducts()
-      .then((data) => {
+    if (page === 1) setState("loading");
+    else setLoadingMore(true);
+
+    // The API caps a request at 100 items, so fetch one page of PAGE_SIZE at a time and append.
+    const queryParams = new URLSearchParams({
+      limit: String(PAGE_SIZE),
+      page: String(page),
+      isActive: "true",
+    });
+    if (type !== "all") queryParams.set("type", type);
+    if (gender !== "all") queryParams.set("gender", gender);
+    if (sort) queryParams.set("sort", sort);
+    if (search) queryParams.set("search", search);
+
+    api
+      .get(`/products?${queryParams.toString()}`)
+      .then((res) => {
         if (!alive) return;
-        setAll(normalizeProducts(data));
+        const list = normalizeProducts(res.data || []);
+        setProducts((prev) => {
+          if (page === 1) return list;
+          const seen = new Set(prev.map((p) => p.id));
+          return [...prev, ...list.filter((p) => !seen.has(p.id))];
+        });
+        setTotalProducts(res.total ?? list.length);
         setState("done");
+        setLoadingMore(false);
       })
-      .catch(() => alive && setState("error"));
+      .catch(() => {
+        if (!alive) return;
+        if (page === 1) setState("error");
+        setLoadingMore(false);
+      });
+
     return () => {
       alive = false;
     };
-  }, []);
+  }, [filterKey, page]);
 
-  const visible = useMemo(() => {
-    let list = all.filter((p) => {
-      if (type !== "all" && p.type !== type) return false;
-      if (gender !== "all" && p.gender !== gender && p.gender !== "unisex") return false;
-      if (search) {
-        const hay = `${p.name} ${p.brand} ${p.family} ${p.tagline} ${p.notes.top.join(" ")} ${p.notes.heart.join(" ")}`.toLowerCase();
-        if (!hay.includes(search.toLowerCase())) return false;
-      }
-      return true;
-    });
-
-    list = [...list].sort((a, b) => {
-      if (sort === "name") return a.name.localeCompare(b.name);
-      if (sort === "price") return (a.startingPrice ?? 1e9) - (b.startingPrice ?? 1e9);
-      if (sort === "-price") return (b.startingPrice ?? 0) - (a.startingPrice ?? 0);
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    });
-    return list;
-  }, [all, type, gender, search, sort]);
-
-  useEffect(() => {
-    setDisplayCount(PAGE_SIZE);
-  }, [type, gender, search, sort]);
-
-  const shown = visible.slice(0, displayCount);
-  const hasMore = displayCount < visible.length;
+  const hasMore = products.length < totalProducts;
 
   const activeFilterCount = (type !== "all") + (gender !== "all") + (search ? 1 : 0);
 
@@ -213,9 +210,9 @@ export default function Products() {
           {state === "done" && (
             <>
               <p className="mb-6 text-[11px] uppercase tracking-[0.16em] text-muted">
-                Showing {shown.length} of {visible.length} {visible.length === 1 ? "fragrance" : "fragrances"}
+                Showing {products.length} of {totalProducts} {totalProducts === 1 ? "fragrance" : "fragrances"}
               </p>
-              {visible.length === 0 ? (
+              {products.length === 0 ? (
                 <div className="border border-line bg-paper py-20 text-center">
                   <p className="text-sm text-muted">Nothing matches those filters.</p>
                   <button
@@ -228,17 +225,18 @@ export default function Products() {
               ) : (
                 <>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3">
-                    {shown.map((p, i) => (
+                    {products.map((p, i) => (
                       <ProductCard key={p.id} product={p} index={i} />
                     ))}
                   </div>
                   {hasMore && (
                     <div className="mt-12 flex justify-center">
                       <button
-                        onClick={() => setDisplayCount((c) => c + PAGE_SIZE)}
+                        onClick={() => setPageState({ key: filterKey, page: page + 1 })}
+                        disabled={loadingMore}
                         className="btn-outline"
                       >
-                        Load more
+                        {loadingMore ? "Loading…" : "Load more"}
                       </button>
                     </div>
                   )}

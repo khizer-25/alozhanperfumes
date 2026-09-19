@@ -1,4 +1,4 @@
-# Lumiere Perfumes E-commerce
+# Perfumes E-commerce
 
 Professional bright-theme perfume storefront built with React (JSX), Vite, Tailwind CSS, GSAP, Framer Motion, and Lucide React.
 
@@ -22,4 +22,4 @@ npm install
 npm run dev
 ```
 
-Open the local URL shown in terminal (usually `http://localhost:5173`).
+

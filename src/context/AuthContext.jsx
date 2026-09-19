@@ -65,7 +65,13 @@ export function AuthProvider({ children }) {
   const login = useCallback(
     async (email, password) => {
       const res = await api.post("/auth/login", { email, password });
-      setAccessToken(res.data.accessToken);
+      const { accessToken, user: userData } = res.data || {};
+      setAccessToken(accessToken);
+      if (userData) {
+        setUser(userData);
+        setStatus("authed");
+        return userData;
+      }
       return loadMe();
     },
     [loadMe]
@@ -74,7 +80,13 @@ export function AuthProvider({ children }) {
   const register = useCallback(
     async (payload) => {
       const res = await api.post("/auth/register", payload);
-      setAccessToken(res.data.accessToken);
+      const { accessToken, user: userData } = res.data || {};
+      setAccessToken(accessToken);
+      if (userData) {
+        setUser(userData);
+        setStatus("authed");
+        return userData;
+      }
       return loadMe();
     },
     [loadMe]
