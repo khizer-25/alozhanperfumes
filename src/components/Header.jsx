@@ -5,7 +5,7 @@ import { ShoppingBag, User, Menu, X, LogOut, LayoutDashboard } from "lucide-reac
 
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import useSettings from "../hooks/useSettings";
+import useSettings, { announcementText } from "../hooks/useSettings";
 
 const NAV = [
   { label: "Home", to: "/" },
@@ -35,7 +35,8 @@ export default function Header() {
 
   useEffect(() => setMenuOpen(false), [location.pathname, location.search]);
 
-  const showBar = settings.announcementEnabled && settings.announcement;
+  const announcement = announcementText(settings);
+  const showBar = settings.announcementEnabled && announcement;
 
   return (
     <>
@@ -43,7 +44,7 @@ export default function Header() {
         {showBar && (
           <div className="bg-ink text-alabaster">
             <p className="container-lux py-2 text-center text-[10.5px] font-light uppercase tracking-[0.22em]">
-              {settings.announcement}
+              {announcement}
             </p>
           </div>
         )}

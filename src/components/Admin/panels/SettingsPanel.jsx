@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../../utils/api";
 import { PanelHeader, EmptyState, Field } from "../ui";
+import { announcementText, updateSettingsCache } from "../../../hooks/useSettings";
 
 export default function SettingsPanel({ notify }) {
   const [form, setForm] = useState(null);
@@ -46,7 +47,8 @@ export default function SettingsPanel({ notify }) {
         invoiceFooter: form.invoiceFooter,
         invoiceTerms: form.invoiceTerms,
       };
-      await api.put("/settings", payload);
+      const res = await api.put("/settings", payload);
+      updateSettingsCache(res?.data || payload);
       notify("Settings saved");
     } catch (e2) {
       notify(e2.message);
@@ -113,6 +115,19 @@ export default function SettingsPanel({ notify }) {
             <Field label="Message">
               <input className="field" value={form.announcement} onChange={(e) => set("announcement", e.target.value)} />
             </Field>
+            <p className="text-[11px] font-light leading-relaxed text-muted">
+              Type <code className="bg-alabaster px-1">{"{freeShipping}"}</code> where the free-shipping amount should
+              appear, and it stays in sync with "Free shipping over" below.
+            </p>
+            <p className="text-[11px] font-light text-muted">
+              Preview:{" "}
+              <span className="uppercase tracking-[0.12em] text-ink">
+                {announcementText({
+                  announcement: form.announcement,
+                  freeShippingThreshold: Number(form.freeShippingThreshold),
+                })}
+              </span>
+            </p>
           </div>
         </section>
 
