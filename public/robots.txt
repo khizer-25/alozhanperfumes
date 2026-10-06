@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /login
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /*?*q=
+Disallow: /*?*sort=
+
+Sitemap: https://www.alozhanperfumes.com/sitemap.xml

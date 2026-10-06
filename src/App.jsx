@@ -6,6 +6,8 @@ import CartDrawer from "./components/cart/CartDrawer";
 import ScrollToTop from "./components/common/ScrollToTop";
 import CookieConsent from "./components/common/CookieConsent";
 import FloatingContactButtons from "./components/FloatingContactButtons";
+import Seo from "./components/common/Seo";
+import NotFound from "./components/common/NotFound";
 
 import Home from "./components/Home/Home";
 import Products from "./components/Products/Products";
@@ -64,14 +66,15 @@ export default function App() {
           <Route path="/products/:slug" element={<ProductDetails />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/legal/:slug" element={<LegalPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/login" element={<><Seo title="Sign in" noindex /><Login /></>} />
+          <Route path="/reset-password" element={<><Seo title="Reset password" noindex /><ResetPassword /></>} />
+          <Route path="/verify-email" element={<><Seo title="Verify email" noindex /><VerifyEmail /></>} />
 
           <Route
             path="/account"
             element={
               <AuthGate>
+                <Seo title="My account" noindex />
                 <Profile />
               </AuthGate>
             }
@@ -80,6 +83,7 @@ export default function App() {
             path="/checkout"
             element={
               <AuthGate>
+                <Seo title="Checkout" noindex />
                 <Checkout />
               </AuthGate>
             }
@@ -88,12 +92,13 @@ export default function App() {
             path="/admin"
             element={
               <AuthGate adminOnly>
+                <Seo title="Admin" noindex />
                 <AdminDashboard />
               </AuthGate>
             }
           />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 

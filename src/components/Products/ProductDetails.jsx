@@ -8,6 +8,55 @@ import Stars from "../common/Stars";
 import { useCart } from "../../context/CartContext";
 import useSettings from "../../hooks/useSettings";
 import ProductReviews from "./ProductReviews";
+import Seo, { SITE_URL } from "../common/Seo";
+
+function productJsonLd(p) {
+  const url = `${SITE_URL}/products/${p.slug}`;
+  const offers = p.variants.map((v) => ({
+    "@type": "Offer",
+    name: `${p.name} ${v.label}`,
+    price: v.effectivePrice,
+    priceCurrency: "INR",
+    availability: v.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    itemCondition: "https://schema.org/NewCondition",
+    url,
+  }));
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Product",
+        name: p.name,
+        description: p.description || p.tagline,
+        image: p.images,
+        sku: p.id,
+        category: p.type === "attar" ? "Attar" : "Eau de Parfum",
+        brand: { "@type": "Brand", name: p.brand },
+        url,
+        offers: offers.length ? offers : undefined,
+        aggregateRating:
+          p.reviewCount > 0
+            ? { "@type": "AggregateRating", ratingValue: p.rating, reviewCount: p.reviewCount }
+            : undefined,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Shop", item: `${SITE_URL}/products` },
+          { "@type": "ListItem", position: 3, name: p.name, item: url },
+        ],
+      },
+    ],
+  };
+}
+
+const metaDescription = (p) => {
+  const kind = p.type === "attar" ? "attar" : "Eau de Parfum";
+  const text = `${p.name} — ${p.tagline ? `${p.tagline} ` : ""}${p.description}`.trim();
+  const base = text.length > 150 ? `${text.slice(0, 147).trimEnd()}…` : text;
+  return base || `Shop ${p.name}, a hand-composed ${kind} by Al Özhan Perfumes.`;
+};
 
 function NotePyramid({ notes }) {
   const rows = [
@@ -92,6 +141,7 @@ export default function ProductDetails() {
   if (state === "error" || !product) {
     return (
       <div className="container-lux py-32 text-center">
+        <Seo title="Fragrance not found" noindex />
         <p className="text-sm text-muted">We couldn't find that fragrance.</p>
         <Link to="/products" className="mt-6 inline-block btn-outline">
           Back to the collection
@@ -112,6 +162,14 @@ export default function ProductDetails() {
 
   return (
     <div className="container-lux py-10 md:py-16">
+      <Seo
+        title={`${product.name} ${product.type === "attar" ? "Attar" : "Eau de Parfum"}`}
+        description={metaDescription(product)}
+        image={product.image}
+        path={`/products/${product.slug}`}
+        type="product"
+        jsonLd={productJsonLd(product)}
+      />
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-muted hover:text-ink"
@@ -139,7 +197,7 @@ export default function ProductDetails() {
                     i === activeImg ? "border-ink" : "border-line"
                   }`}
                 >
-                  <img src={src} alt="" className="h-full w-full object-cover" />
+                  <img src={src} alt={`${product.name} — view ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
                 </button>
               ))}
             </div>

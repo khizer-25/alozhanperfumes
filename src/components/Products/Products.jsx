@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { api } from "../../utils/api";
 import { normalizeProducts } from "../../utils/normalize";
 import ProductCard from "./ProductCard";
+import Seo from "../common/Seo";
 
 const SORTS = [
   { value: "-createdAt", label: "Newest" },
@@ -124,6 +125,18 @@ export default function Products() {
 
   return (
     <div className="container-lux py-14 md:py-20">
+      <Seo
+        title={type === "attar" ? "Attars" : type === "perfume" ? "Perfumes" : "Shop All Fragrances"}
+        description={
+          type === "attar"
+            ? "Shop pure, alcohol-free attars from Al Özhan — concentrated perfume oils composed by hand in small batches."
+            : type === "perfume"
+            ? "Shop Al Özhan Eau de Parfum — long-lasting, small-batch perfumes built from rare naturals."
+            : "Browse every Al Özhan perfume and attar. Filter by category and wear — every order ships with samples."
+        }
+        path={type === "attar" || type === "perfume" ? `/products?type=${type}` : "/products"}
+        noindex={Boolean(search)}
+      />
       <header className="mx-auto max-w-xl text-center">
         <p className="eyebrow">The Library</p>
         <h1 className="mt-3 text-4xl md:text-5xl">

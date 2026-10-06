@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Mail, Phone, MapPin, Check } from "lucide-react";
 import { api } from "../../utils/api";
 import useSettings from "../../hooks/useSettings";
+import Seo from "../common/Seo";
 
 export default function Contact({ embedded = false }) {
   const settings = useSettings();
@@ -35,6 +36,12 @@ export default function Contact({ embedded = false }) {
           : "container-lux py-16 md:py-24"
       }
     >
+      {!embedded && (
+        <Seo
+          title="Contact Us"
+          description="Get in touch with Al Özhan Perfumes — questions about fragrances, orders, shipping or returns."
+        />
+      )}
       <div className={`grid gap-14 lg:grid-cols-2 ${embedded ? "container-lux" : ""}`}>
         <div>
           <p className="eyebrow">Get in touch</p>

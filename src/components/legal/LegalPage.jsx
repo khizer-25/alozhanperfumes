@@ -1,7 +1,9 @@
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import useSettings from "../../hooks/useSettings";
 import { formatPrice } from "../../utils/format";
 import { LEGAL_PAGES } from "../../content/legal";
+import Seo from "../common/Seo";
+import NotFound from "../common/NotFound";
 
 const LAST_UPDATED = "10 September 2026";
 
@@ -17,7 +19,7 @@ export default function LegalPage() {
   const settings = useSettings();
   const page = LEGAL_PAGES[slug];
 
-  if (!page) return <Navigate to="/" replace />;
+  if (!page) return <NotFound />;
 
   // Interpolate {tokens} in copy with real store values.
   const fill = (text) =>
@@ -35,6 +37,10 @@ export default function LegalPage() {
 
   return (
     <div className="container-lux py-14 md:py-20">
+      <Seo
+        title={page.title}
+        description={`${page.title} for Al Özhan Perfumes — how we handle orders, shipping, returns and your data.`}
+      />
       <div className="mx-auto max-w-3xl">
         <p className="eyebrow">Legal</p>
         <h1 className="mt-3 text-4xl md:text-5xl">{page.title}</h1>

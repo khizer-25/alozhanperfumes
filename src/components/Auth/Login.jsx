@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Mail, Lock, User, ArrowRight, Eye, EyeOff, Check } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../utils/api";
+import GoogleButton, { googleSignInEnabled } from "./GoogleButton";
 
 const MODES = { LOGIN: "login", REGISTER: "register", FORGOT: "forgot" };
 
@@ -15,7 +16,7 @@ const PASSWORD_RULES = [
 ];
 
 export default function Login() {
-  const { login, register } = useAuth();
+  const { login, register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/account";
@@ -73,6 +74,20 @@ export default function Login() {
     }
   };
 
+  const handleGoogle = async (credential) => {
+    setError("");
+    setNotice("");
+    setBusy(true);
+    try {
+      const user = await loginWithGoogle(credential);
+      navigate(user.role === "admin" ? "/admin" : from, { replace: true });
+    } catch (err) {
+      setError(err.message || "Google sign-in failed. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const switchMode = (next) => {
     setMode(next);
     setError("");
@@ -107,6 +122,20 @@ export default function Login() {
             <p className="mb-5 border-l-2 border-gold bg-[#f4efe4] px-4 py-3 text-xs text-gold-deep">
               {notice}
             </p>
+          )}
+
+          {mode !== MODES.FORGOT && googleSignInEnabled && (
+            <>
+              <GoogleButton
+                text={mode === MODES.REGISTER ? "signup_with" : "continue_with"}
+                onCredential={handleGoogle}
+              />
+              <div className="my-6 flex items-center gap-4">
+                <span className="h-px flex-1 bg-line" />
+                <span className="text-[10px] uppercase tracking-[0.2em] text-muted">or with email</span>
+                <span className="h-px flex-1 bg-line" />
+              </div>
+            </>
           )}
 
           <form onSubmit={submit} className="space-y-5">

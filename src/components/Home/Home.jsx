@@ -6,6 +6,7 @@ import FeaturedCollection from "./FeaturedCollection";
 import Contact from "./Contactus";
 import Reveal from "../common/Reveal";
 import useSettings from "../../hooks/useSettings";
+import Seo, { SITE_URL, SITE_NAME } from "../common/Seo";
 
 /**
  * Background video for the hero.
@@ -455,9 +456,35 @@ function Newsletter() {
   );
 }
 
+const ORG_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}/favicon.png`,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/products?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
+
 export default function Home() {
   return (
     <>
+      <Seo jsonLd={ORG_LD} />
       <Hero />
       <Marquee />
       <FeaturedCollection />

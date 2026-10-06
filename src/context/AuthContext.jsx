@@ -92,6 +92,17 @@ export function AuthProvider({ children }) {
     [loadMe]
   );
 
+  // `credential` is the Google ID token from Google Identity Services;
+  // the backend verifies it and starts a normal session.
+  const loginWithGoogle = useCallback(
+    async (credential) => {
+      const res = await api.post("/auth/google", { credential });
+      setAccessToken(res.data?.accessToken);
+      return loadMe();
+    },
+    [loadMe]
+  );
+
   const logout = useCallback(async () => {
     try {
       await api.post("/auth/logout");
@@ -117,6 +128,7 @@ export function AuthProvider({ children }) {
     isAdmin: user?.role === "admin",
     login,
     register,
+    loginWithGoogle,
     logout,
     refreshUser,
     setUser,
