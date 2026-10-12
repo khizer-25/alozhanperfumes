@@ -42,8 +42,8 @@ export default function VerifyEmail() {
           <h1 className="mt-6 text-3xl md:text-4xl">Email confirmed</h1>
           <div className="rule mx-auto mt-4" />
           <p className="mt-5 max-w-sm text-sm font-light text-muted">{message}</p>
-          <Link to="/account" className="mt-8 btn-primary">
-            Go to my account
+          <Link to="/login" className="mt-8 btn-primary">
+            Sign in
           </Link>
         </>
       )}
@@ -59,10 +59,10 @@ export default function VerifyEmail() {
             {state === "missing"
               ? "This link is missing its token."
               : message}{" "}
-            You can request a fresh link from your account.
+            Sign in and we'll send you a fresh code.
           </p>
-          <Link to="/account" className="mt-8 btn-outline">
-            My account
+          <Link to="/login" className="mt-8 btn-outline">
+            Sign in
           </Link>
         </>
       )}

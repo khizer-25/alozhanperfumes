@@ -77,20 +77,12 @@ export function AuthProvider({ children }) {
     [loadMe]
   );
 
-  const register = useCallback(
-    async (payload) => {
-      const res = await api.post("/auth/register", payload);
-      const { accessToken, user: userData } = res.data || {};
-      setAccessToken(accessToken);
-      if (userData) {
-        setUser(userData);
-        setStatus("authed");
-        return userData;
-      }
-      return loadMe();
-    },
-    [loadMe]
-  );
+  // Sign-up doesn't start a session: the user verifies their email first,
+  // then signs in. Resolves to `{ email, requiresVerification }`.
+  const register = useCallback(async (payload) => {
+    const res = await api.post("/auth/register", payload);
+    return res.data;
+  }, []);
 
   // `credential` is the Google ID token from Google Identity Services;
   // the backend verifies it and starts a normal session.

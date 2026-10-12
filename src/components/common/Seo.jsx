@@ -53,7 +53,8 @@ export default function Seo({
   const ld = jsonLd ? JSON.stringify(jsonLd) : null;
 
   useEffect(() => {
-    document.title = fullTitle;
+    // Browser tab always shows just the brand; page-specific titles go to OG/Twitter.
+    document.title = SITE_NAME;
     setMeta("name", "description", description);
     setMeta("name", "robots", noindex ? "noindex, nofollow" : "index, follow");
     setCanonical(url);

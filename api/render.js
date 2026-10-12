@@ -79,7 +79,7 @@ function renderHead(template, meta) {
   const image = meta.image || DEFAULT_IMAGE;
 
   const tags = [
-    `<title>${escape(title)}</title>`,
+    `<title>${escape(SITE_NAME)}</title>`,
     `<meta name="description" content="${escape(description)}" />`,
     `<meta name="robots" content="${meta.noindex ? "noindex, nofollow" : "index, follow"}" />`,
     !meta.noindex && `<link rel="canonical" href="${escape(url)}" />`,
