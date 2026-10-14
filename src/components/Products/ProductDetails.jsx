@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Check, Minus, Plus, Truck, RotateCcw, Sparkles } from "lucide-react";
 import { api } from "../../utils/api";
 import { normalizeProduct } from "../../utils/normalize";
+import { addRecentlyViewed } from "../../utils/recentlyViewed";
+import WishlistButton from "../common/WishlistButton";
 import { formatPrice } from "../../utils/format";
 import Stars from "../common/Stars";
 import { useCart } from "../../context/CartContext";
@@ -113,6 +115,7 @@ export default function ProductDetails() {
         if (!alive) return;
         const p = normalizeProduct(res.data);
         setProduct(p);
+        addRecentlyViewed(p);
         const firstInStock = p.variants.find((v) => v.inStock) || p.variants[0];
         setVariantId(firstInStock?.id || null);
         setState("done");
@@ -284,10 +287,11 @@ export default function ProductDetails() {
             </div>
           </div>
 
+          <div className="mt-6 flex gap-3">
           <button
             onClick={handleAdd}
             disabled={!canBuy}
-            className="mt-6 w-full btn-primary py-4"
+            className="flex-1 btn-primary py-4"
           >
             {added ? (
               <>
@@ -299,6 +303,8 @@ export default function ProductDetails() {
               "Sold out"
             )}
           </button>
+          <WishlistButton productId={product.id} productName={product.name} variant="button" />
+          </div>
 
           {variant?.inStock && variant.stock <= 5 && (
             <p className="mt-3 text-[11px] uppercase tracking-[0.14em] text-gold-deep">

@@ -9,6 +9,7 @@ import {
   Users,
   MailOpen,
   Settings as SettingsIcon,
+  Sparkles,
   ArrowUpRight,
   LogOut,
 } from "lucide-react";
@@ -23,6 +24,7 @@ import ReviewsPanel from "./panels/ReviewsPanel";
 import CustomersPanel from "./panels/CustomersPanel";
 import MessagesPanel from "./panels/MessagesPanel";
 import SettingsPanel from "./panels/SettingsPanel";
+import QuizPanel from "./panels/QuizPanel";
 
 const NAV = [
   { key: "overview", label: "Overview", icon: LayoutDashboard, Panel: OverviewPanel },
@@ -32,6 +34,7 @@ const NAV = [
   { key: "reviews", label: "Reviews", icon: Star, Panel: ReviewsPanel },
   { key: "customers", label: "Customers", icon: Users, Panel: CustomersPanel },
   { key: "messages", label: "Messages", icon: MailOpen, Panel: MessagesPanel },
+  { key: "quiz", label: "Scent quiz", icon: Sparkles, Panel: QuizPanel },
   { key: "settings", label: "Settings", icon: SettingsIcon, Panel: SettingsPanel },
 ];
 

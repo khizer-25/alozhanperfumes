@@ -104,6 +104,15 @@ export function AuthProvider({ children }) {
     clearSession();
   }, [clearSession]);
 
+  // Session handed back by a successful sign-up verification.
+  const completeSignIn = useCallback(
+    async (accessToken) => {
+      setAccessToken(accessToken);
+      return loadMe();
+    },
+    [loadMe]
+  );
+
   const refreshUser = useCallback(async () => {
     try {
       return await loadMe();
@@ -121,6 +130,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     loginWithGoogle,
+    completeSignIn,
     logout,
     refreshUser,
     setUser,

@@ -9,12 +9,15 @@ const RESEND_SECONDS = 60;
  * "Verify your email" step shown after sign-up (or an unverified sign-in).
  * The email carries both a link and a 6-digit code; this screen takes the code.
  */
-export default function VerifyOtp({ email, onVerified, onBack }) {
+export default function VerifyOtp({ email, sendFailed = false, onVerified, onBack }) {
   const [digits, setDigits] = useState(Array(LENGTH).fill(""));
-  const [error, setError] = useState("");
+  const [error, setError] = useState(
+    sendFailed ? "Your account is created, but we couldn't send the verification email. Tap “Resend code” to try again." : ""
+  );
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
-  const [cooldown, setCooldown] = useState(RESEND_SECONDS);
+  // If the first email failed there's nothing to wait for — allow a resend at once.
+  const [cooldown, setCooldown] = useState(sendFailed ? 0 : RESEND_SECONDS);
   const inputs = useRef([]);
 
   useEffect(() => {
@@ -77,7 +80,7 @@ export default function VerifyOtp({ email, onVerified, onBack }) {
     setBusy(true);
     try {
       const res = await api.post("/auth/verify-otp", { email, code });
-      onVerified(res.message || "Email verified. You can now sign in.");
+      onVerified(res.message || "Email verified. You can now sign in.", res.data);
     } catch (err) {
       setError(err.message || "That code didn't work. Please try again.");
       setDigits(Array(LENGTH).fill(""));
@@ -92,11 +95,12 @@ export default function VerifyOtp({ email, onVerified, onBack }) {
     setNotice("");
     try {
       await api.post("/auth/resend-verification", { email });
-      setNotice("A new code is on its way.");
+      setNotice("A new code is on its way — check your inbox and spam folder.");
       setDigits(Array(LENGTH).fill(""));
       setCooldown(RESEND_SECONDS);
     } catch (err) {
       setError(err.message || "Couldn't resend the code. Please try again.");
+      if (err?.status === 429) setCooldown(RESEND_SECONDS);
     }
   };
 
@@ -107,9 +111,9 @@ export default function VerifyOtp({ email, onVerified, onBack }) {
           <MailCheck size={20} />
         </div>
         <p className="mt-5 text-sm font-light leading-relaxed text-muted">
-          We have sent a verification link to{" "}
-          <span className="font-normal text-ink break-all">{email}</span>. Open it to activate
-          your account, then sign in.
+          We've emailed a 6-digit code to{" "}
+          <span className="font-normal text-ink break-all">{email}</span>. Enter it below to
+          create your account.
         </p>
         <p className="mt-4 w-full border-l-2 border-gold bg-[#f4efe4] px-4 py-3 text-left text-xs text-gold-deep">
           Check your Inbox or Spam folder.
@@ -129,7 +133,7 @@ export default function VerifyOtp({ email, onVerified, onBack }) {
 
       <form onSubmit={submit} className="mt-6 space-y-5">
         <div>
-          <label className="label text-center">Or enter the 6-digit code</label>
+          <label className="label text-center">Verification code</label>
           <div className="mt-1 flex justify-center gap-2">
             {digits.map((d, i) => (
               <input

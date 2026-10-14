@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { formatPrice } from "../../utils/format";
 import Stars from "../common/Stars";
 import { useCart } from "../../context/CartContext";
+import WishlistButton from "../common/WishlistButton";
 
 export default function ProductCard({ product, index = 0 }) {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ export default function ProductCard({ product, index = 0 }) {
             </span>
           )}
         </div>
+        <WishlistButton productId={product.id} productName={product.name} className="absolute right-3 top-3" />
         <button
           onClick={quickAdd}
           className="absolute inset-x-0 bottom-0 translate-y-full bg-ink/95 py-3.5 text-[10.5px] font-medium uppercase tracking-[0.2em] text-alabaster transition-transform duration-300 group-hover:translate-y-0"

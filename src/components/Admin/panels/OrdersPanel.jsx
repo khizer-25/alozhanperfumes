@@ -197,7 +197,7 @@ export default function OrdersPanel({ notify }) {
                         </div>
                         {o.taxPrice > 0 && (
                           <div className="flex justify-between">
-                            <span className="text-muted">Tax</span>
+                            <span className="text-muted">{o.taxInclusive ? "GST (included)" : "GST"}</span>
                             <span className="tabular-nums">{formatPrice(o.taxPrice)}</span>
                           </div>
                         )}

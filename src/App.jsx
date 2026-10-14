@@ -13,6 +13,8 @@ import Home from "./components/Home/Home";
 import Products from "./components/Products/Products";
 import ProductDetails from "./components/Products/ProductDetails";
 import Contact from "./components/Home/Contactus";
+import WishlistPage from "./components/Wishlist";
+import ScentQuiz from "./components/ScentQuiz";
 import Login from "./components/Auth/Login";
 import ResetPassword from "./components/Auth/ResetPassword";
 import VerifyEmail from "./components/Auth/VerifyEmail";
@@ -65,6 +67,7 @@ export default function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/products/:slug" element={<ProductDetails />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/legal/:slug" element={<LegalPage />} />
           <Route path="/login" element={<><Seo title="Sign in" noindex /><Login /></>} />
           <Route path="/reset-password" element={<><Seo title="Reset password" noindex /><ResetPassword /></>} />
@@ -111,6 +114,7 @@ export default function App() {
 
       <CartDrawer />
       {!isAdminRoute && <CookieConsent />}
+      {!isAdminRoute && <ScentQuiz />}
     </div>
   );
 }

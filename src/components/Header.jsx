@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, User, Menu, X, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard } from "lucide-react";
+import { useWishlist } from "../context/WishlistContext";
+import { BagIcon, WishlistIcon, UserIcon, CountBadge } from "./common/Icons";
 
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -15,6 +17,7 @@ const NAV = [
 
 export default function Header() {
   const { count, openCart } = useCart();
+  const { count: savedCount } = useWishlist();
   const { isAuthed, isAdmin, user, logout } = useAuth();
   const settings = useSettings();
   const location = useLocation();
@@ -25,6 +28,13 @@ export default function Header() {
 
   const isHome = location.pathname === "/";
   const transparent = isHome && !scrolled;
+
+  // Over the hero video the icons go light, with a soft shadow so they read on any frame.
+  const iconClass = `relative flex h-9 w-9 items-center justify-center transition-colors ${
+    transparent
+      ? "text-alabaster [filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.45))] hover:text-gold-soft"
+      : "text-ink hover:text-gold-deep"
+  }`;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -52,7 +62,7 @@ export default function Header() {
         <div
           className={`transition-colors duration-300 ${
             transparent
-              ? "bg-transparent text-alabaster"
+              ? "bg-gradient-to-b from-ink/55 via-ink/25 to-transparent text-alabaster"
               : "border-b border-line bg-alabaster/95 text-ink backdrop-blur"
           }`}
         >
@@ -96,7 +106,7 @@ export default function Header() {
             </Link>
 
             {/* Right: account + cart */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5 md:gap-2.5">
               {isAdmin && (
                 <Link
                   to="/admin"
@@ -106,23 +116,30 @@ export default function Header() {
                 </Link>
               )}
               <Link
-                to={isAuthed ? "/account" : "/login"}
-                aria-label="Account"
-                className="hover:opacity-70"
+                to={isAuthed ? "/account?tab=wishlist" : "/wishlist"}
+                aria-label={savedCount ? `Wishlist (${savedCount})` : "Wishlist"}
+                title="Wishlist"
+                className={iconClass}
               >
-                <User size={19} strokeWidth={1.5} />
+                <WishlistIcon />
+                <CountBadge count={savedCount} light={transparent} />
+              </Link>
+              <Link
+                to={isAuthed ? "/account" : "/login"}
+                aria-label={isAuthed ? "My account" : "Sign in"}
+                title={isAuthed ? "My account" : "Sign in"}
+                className={iconClass}
+              >
+                <UserIcon />
               </Link>
               <button
                 onClick={openCart}
-                aria-label="Cart"
-                className="relative hover:opacity-70"
+                aria-label={count ? `Shopping bag (${count})` : "Shopping bag"}
+                title="Shopping bag"
+                className={iconClass}
               >
-                <ShoppingBag size={19} strokeWidth={1.5} />
-                {count > 0 && (
-                  <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[9px] font-semibold text-white">
-                    {count}
-                  </span>
-                )}
+                <BagIcon />
+                <CountBadge count={count} light={transparent} />
               </button>
             </div>
           </div>
@@ -169,7 +186,10 @@ export default function Header() {
               </div>
               <div className="mt-8 flex flex-col gap-3 text-[11px] uppercase tracking-[0.16em]">
                 <Link to={isAuthed ? "/account" : "/login"} className="flex items-center gap-2">
-                  <User size={15} /> {isAuthed ? "My Account" : "Sign In"}
+                  <UserIcon width={16} height={16} /> {isAuthed ? "My Account" : "Sign In"}
+                </Link>
+                <Link to={isAuthed ? "/account?tab=wishlist" : "/wishlist"} className="flex items-center gap-2">
+                  <WishlistIcon width={16} height={16} /> Wishlist{savedCount ? ` (${savedCount})` : ""}
                 </Link>
                 {isAdmin && (
                   <Link to="/admin" className="flex items-center gap-2">

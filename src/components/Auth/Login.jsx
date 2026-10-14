@@ -51,7 +51,7 @@ function PasswordInput({ value, onChange, onBlur, placeholder, show, onToggle, i
 }
 
 export default function Login() {
-  const { login, register, loginWithGoogle } = useAuth();
+  const { login, register, loginWithGoogle, completeSignIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/account";
@@ -59,6 +59,7 @@ export default function Login() {
   const [mode, setMode] = useState(MODES.LOGIN);
   const [form, setForm] = useState(EMPTY_FORM);
   const [pendingEmail, setPendingEmail] = useState("");
+  const [sendFailed, setSendFailed] = useState(false); // first verification email didn't go out
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -74,8 +75,9 @@ export default function Login() {
   const passwordsMatch = form.password === form.confirmPassword;
   const username = form.username.trim().toLowerCase();
 
-  const goVerify = (email) => {
+  const goVerify = (email, failed = false) => {
     setPendingEmail(email);
+    setSendFailed(failed);
     setMode(MODES.VERIFY);
     setError("");
     setNotice("");
@@ -116,7 +118,7 @@ export default function Login() {
           password: form.password,
         });
         setForm((f) => ({ ...f, password: "", confirmPassword: "" }));
-        goVerify(res?.email || form.email);
+        goVerify(res?.email || form.email, res?.emailSent === false);
       } else {
         const res = await api.post("/auth/forgot-password", { email: form.email });
         setNotice(res.message || "If that email exists, a reset link is on its way.");
@@ -161,7 +163,17 @@ export default function Login() {
     setShowConfirm(false);
   };
 
-  const handleVerified = (message) => {
+  const handleVerified = async (message, data) => {
+    // New sign-ups come back signed in.
+    if (data?.accessToken) {
+      try {
+        await completeSignIn(data.accessToken);
+        navigate(from, { replace: true });
+        return;
+      } catch {
+        /* fall back to the sign-in form */
+      }
+    }
     switchMode(MODES.LOGIN);
     setForm({ ...EMPTY_FORM, email: pendingEmail });
     setNotice(message);
@@ -187,6 +199,7 @@ export default function Login() {
           {mode === MODES.VERIFY ? (
             <VerifyOtp
               email={pendingEmail}
+              sendFailed={sendFailed}
               onVerified={handleVerified}
               onBack={() => switchMode(MODES.LOGIN)}
             />

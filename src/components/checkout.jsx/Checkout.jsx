@@ -20,7 +20,8 @@ const blankAddress = {
 
 export default function Checkout() {
   const { items, subtotal, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const [saveAddress, setSaveAddress] = useState(true);
   const settings = useSettings();
   const navigate = useNavigate();
 
@@ -51,8 +52,13 @@ export default function Checkout() {
     () => (subtotal >= (settings.freeShippingThreshold || Infinity) ? 0 : settings.shippingFee || 0),
     [subtotal, settings]
   );
-  const tax = Math.round((subtotal * (settings.taxRatePercent || 0)) / 100);
-  const total = subtotal + shipping + tax;
+  // Mirrors Backend/src/utils/tax.js — inclusive prices already contain the GST.
+  const taxRate = settings.taxRatePercent || 0;
+  const taxInclusive = !!settings.taxInclusive;
+  const tax = taxInclusive
+    ? Math.round(subtotal - subtotal / (1 + taxRate / 100))
+    : Math.round((subtotal * taxRate) / 100);
+  const total = subtotal + shipping + (taxInclusive ? 0 : tax);
 
   const onlineEnabled = !!settings.onlinePaymentsEnabled;
 
@@ -72,6 +78,7 @@ export default function Checkout() {
     activeAddress.phone &&
     activeAddress.line1 &&
     activeAddress.city &&
+    (selectedAddrId !== "new" || activeAddress.state) &&
     activeAddress.postalCode;
 
   const placeOrder = async () => {
@@ -95,6 +102,7 @@ export default function Checkout() {
           country: activeAddress.country || "India",
         },
         paymentMethod: payment,
+        saveAddress: selectedAddrId === "new" && saveAddress,
       };
       const res = await api.post("/orders", payload, {
         headers: { "Idempotency-Key": idempotencyKey.current },
@@ -102,6 +110,7 @@ export default function Checkout() {
       setPlaced(res.data);
       setStep("done");
       clearCart();
+      if (selectedAddrId === "new" && saveAddress) refreshUser(); // show it in the address book
     } catch (e) {
       setError(e.message || "We couldn't place your order.");
     } finally {
@@ -221,9 +230,18 @@ export default function Checkout() {
                   <input required placeholder="Address line 1" className="field sm:col-span-2" value={form.line1} onChange={set("line1")} />
                   <input placeholder="Address line 2 (optional)" className="field sm:col-span-2" value={form.line2} onChange={set("line2")} />
                   <input required placeholder="City" className="field" value={form.city} onChange={set("city")} />
-                  <input placeholder="State" className="field" value={form.state} onChange={set("state")} />
+                  <input required placeholder="State" className="field" value={form.state} onChange={set("state")} />
                   <input required placeholder="Postal code" className="field" value={form.postalCode} onChange={set("postalCode")} />
                   <input required placeholder="Country" className="field" value={form.country} onChange={set("country")} />
+                  <label className="flex items-center gap-2 text-sm font-light sm:col-span-2">
+                    <input
+                      type="checkbox"
+                      className="accent-[color:var(--gold)]"
+                      checked={saveAddress}
+                      onChange={(e) => setSaveAddress(e.target.checked)}
+                    />
+                    Save this address to my account for next time
+                  </label>
                 </div>
               )}
 
@@ -352,7 +370,7 @@ export default function Checkout() {
             </div>
             {tax > 0 && (
               <div className="flex justify-between">
-                <dt className="text-muted">Tax</dt>
+                <dt className="text-muted">{taxInclusive ? `Includes GST (${taxRate}%)` : `GST (${taxRate}%)`}</dt>
                 <dd className="tabular-nums">{formatPrice(tax)}</dd>
               </div>
             )}

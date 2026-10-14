@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Leaf, FlaskConical, Package, Sparkles } from "lucide-react";
 import FeaturedCollection from "./FeaturedCollection";
+import PickedForYou from "./PickedForYou";
 import Contact from "./Contactus";
 import Reveal from "../common/Reveal";
 import useSettings from "../../hooks/useSettings";
@@ -264,17 +265,17 @@ function Hero() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.24 }}
-          className="mt-9 flex flex-wrap gap-4"
+          className="mt-9 flex gap-3 sm:gap-4"
         >
           <Link
             to="/products"
-            className="btn bg-alabaster px-9 py-4 text-ink hover:bg-gold hover:text-white"
+            className="btn flex-1 whitespace-nowrap bg-alabaster px-3 py-3.5 text-[10px] tracking-[0.12em] text-ink hover:bg-gold hover:text-white sm:flex-none sm:px-9 sm:py-4 sm:text-[12px] sm:tracking-[0.18em]"
           >
             Shop the collection
           </Link>
           <Link
             to="/products?type=attar"
-            className="btn border border-alabaster/40 px-9 py-4 text-alabaster hover:bg-alabaster hover:text-ink"
+            className="btn flex-1 whitespace-nowrap border border-alabaster/40 px-3 py-3.5 text-[10px] tracking-[0.12em] text-alabaster hover:bg-alabaster hover:text-ink sm:flex-none sm:px-9 sm:py-4 sm:text-[12px] sm:tracking-[0.18em]"
           >
             Discover attars
           </Link>
@@ -487,6 +488,7 @@ export default function Home() {
       <Seo jsonLd={ORG_LD} />
       <Hero />
       <Marquee />
+      <PickedForYou />
       <FeaturedCollection />
       <CategorySplit />
       <Story />

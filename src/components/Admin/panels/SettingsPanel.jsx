@@ -37,6 +37,7 @@ export default function SettingsPanel({ notify }) {
         freeShippingThreshold: Number(form.freeShippingThreshold),
         shippingFee: Number(form.shippingFee),
         taxRatePercent: Number(form.taxRatePercent),
+        taxInclusive: !!form.taxInclusive,
         codEnabled: form.codEnabled,
         codMinOrder: Number(form.codMinOrder),
         codMaxOrder: Number(form.codMaxOrder),
@@ -140,8 +141,14 @@ export default function SettingsPanel({ notify }) {
             <Field label="Shipping fee (₹)">
               <input type="number" className="field" value={form.shippingFee} onChange={(e) => set("shippingFee", e.target.value)} />
             </Field>
-            <Field label="Tax rate (%)">
+            <Field label="GST rate (%)">
               <input type="number" className="field" value={form.taxRatePercent} onChange={(e) => set("taxRatePercent", e.target.value)} />
+            </Field>
+            <Field label="Product prices">
+              <select className="field" value={form.taxInclusive ? "incl" : "excl"} onChange={(e) => set("taxInclusive", e.target.value === "incl")}>
+                <option value="excl">Exclude GST (added at checkout)</option>
+                <option value="incl">Include GST (shown in the price)</option>
+              </select>
             </Field>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
